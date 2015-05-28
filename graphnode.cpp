@@ -3,7 +3,7 @@
 GraphNode::GraphNode(qreal x, qreal y, qreal _r)
 :
   QGraphicsEllipseItem(x - _r, y - _r, _r + _r, _r + _r),
-  cx(x), cy(y), r(_r), sourceEdge(NULL), destinationEdge(NULL)
+  label(""), cx(x), cy(y), r(_r), sourceEdge(NULL), destinationEdge(NULL)
 {
     setFlag(ItemIsMovable);
     setFlag(ItemSendsGeometryChanges);
@@ -14,6 +14,19 @@ QPointF GraphNode::getCenter()
     return QPointF(cx, cy);
 }
 
+void GraphNode::setLabel(QString _label)
+{
+    label = _label;
+}
+
+void GraphNode::setRadius(qreal _r)
+{
+    r = _r;
+    qreal d = r + r;
+    setRect(cx - r, cy - r, d, d);
+    update();
+}
+
 void GraphNode::paint(QPainter *painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
 {
     QPen pen(Qt::black, 2);
@@ -21,7 +34,7 @@ void GraphNode::paint(QPainter *painter, const QStyleOptionGraphicsItem* /*optio
     painter->setPen(pen);
     painter->setBrush(brush);
     painter->drawEllipse(rect());
-    painter->drawText(rect(), Qt::AlignCenter, "x");
+    painter->drawText(rect(), Qt::AlignCenter, label);
 }
 
 void GraphNode::moveTo(const QPointF& pt)

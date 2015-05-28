@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>347</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -38,18 +38,83 @@
     <property name="title">
      <string>File</string>
     </property>
+    <widget class="QMenu" name="menuNew">
+     <property name="title">
+      <string>New</string>
+     </property>
+     <addaction name="actionUnweighted_graph"/>
+     <addaction name="actionWeighted_Graph"/>
+    </widget>
+    <widget class="QMenu" name="menuExport">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="title">
+      <string>Export</string>
+     </property>
+     <addaction name="actionPNG"/>
+    </widget>
+    <addaction name="menuNew"/>
     <addaction name="actionOpen"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionSave_as"/>
+    <addaction name="menuExport"/>
     <addaction name="actionClose"/>
     <addaction name="actionQuit"/>
    </widget>
+   <widget class="QMenu" name="menuGraph">
+    <property name="title">
+     <string>Graph</string>
+    </property>
+    <widget class="QMenu" name="menuAdd_Edge">
+     <property name="title">
+      <string>Add Edge</string>
+     </property>
+     <addaction name="actionDirected"/>
+     <addaction name="actionUndirected"/>
+    </widget>
+    <addaction name="actionAdd_vertex"/>
+    <addaction name="menuAdd_Edge"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuGraph"/>
   </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <property name="movable">
+    <bool>false</bool>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>16</width>
+     <height>16</height>
+    </size>
+   </property>
+   <property name="floatable">
+    <bool>false</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionAdd_Vertex"/>
+   <addaction name="actionAdd_Directed_Edge"/>
+   <addaction name="actionAdd_Undirected_Edge"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
    <property name="text">
     <string>Open</string>
    </property>
   </action>
   <action name="actionClose">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Close</string>
    </property>
@@ -57,6 +122,86 @@
   <action name="actionQuit">
    <property name="text">
     <string>Quit</string>
+   </property>
+  </action>
+  <action name="actionUnweighted_graph">
+   <property name="text">
+    <string>Unweighted Graph</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionSave_as">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Save As...</string>
+   </property>
+  </action>
+  <action name="actionAdd_vertex">
+   <property name="text">
+    <string>Add Vertex</string>
+   </property>
+  </action>
+  <action name="actionDirected">
+   <property name="text">
+    <string>Directed</string>
+   </property>
+  </action>
+  <action name="actionUndirected">
+   <property name="text">
+    <string>Undirected</string>
+   </property>
+  </action>
+  <action name="actionPNG">
+   <property name="text">
+    <string>PNG</string>
+   </property>
+  </action>
+  <action name="actionWeighted_Graph">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Weighted Graph</string>
+   </property>
+  </action>
+  <action name="actionAdd_Vertex">
+   <property name="icon">
+    <iconset resource="icons/icons.qrc">
+     <normaloff>:/node_icon.bmp</normaloff>
+     <normalon>icons/node_icon.bmp</normalon>:/node_icon.bmp</iconset>
+   </property>
+   <property name="text">
+    <string>Add Vertex</string>
+   </property>
+  </action>
+  <action name="actionAdd_Directed_Edge">
+   <property name="icon">
+    <iconset resource="icons/icons.qrc">
+     <normaloff>:/directed_arrow_icon.bmp</normaloff>:/directed_arrow_icon.bmp</iconset>
+   </property>
+   <property name="text">
+    <string>Add Directed Edge</string>
+   </property>
+  </action>
+  <action name="actionAdd_Undirected_Edge">
+   <property name="icon">
+    <iconset resource="icons/icons.qrc">
+     <normaloff>:/undirected_arrow_icon.bmp</normaloff>:/undirected_arrow_icon.bmp</iconset>
+   </property>
+   <property name="text">
+    <string>Add Undirected Edge</string>
    </property>
   </action>
  </widget>
@@ -68,6 +213,8 @@
    <header>graphview.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="icons/icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

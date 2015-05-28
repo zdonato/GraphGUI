@@ -19,7 +19,11 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    GraphView *graphView;
+
+protected slots:
+    void menuOptionClicked(QAction* action);
+    void toolBarOptionClicked(QAction* action);
+    void radiusChanged(int r);
 
 };
 
