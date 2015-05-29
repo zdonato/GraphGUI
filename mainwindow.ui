@@ -101,6 +101,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionMove"/>
    <addaction name="actionAdd_Vertex"/>
    <addaction name="actionAdd_Directed_Edge"/>
    <addaction name="actionAdd_Undirected_Edge"/>
@@ -202,6 +203,15 @@
    </property>
    <property name="text">
     <string>Add Undirected Edge</string>
+   </property>
+  </action>
+  <action name="actionMove">
+   <property name="icon">
+    <iconset resource="icons/icons.qrc">
+     <normaloff>:/moving_icon.bmp</normaloff>:/moving_icon.bmp</iconset>
+   </property>
+   <property name="text">
+    <string>Move</string>
    </property>
   </action>
  </widget>

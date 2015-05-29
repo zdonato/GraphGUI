@@ -1,20 +1,38 @@
 #ifndef GRAPHEDGE_H
 #define GRAPHEDGE_H
 
+#include <QGraphicsItem>
 #include <QGraphicsLineItem>
 #include <QPainter>
+#include <QPainterPath>
 
-class GraphEdge : public QGraphicsLineItem
+class GraphNode;
+
+class GraphEdge : public QGraphicsItem
 {
 public:
-    GraphEdge(qreal x1, qreal y1, qreal x2, qreal y2);
-    virtual ~GraphEdge(){}
+    GraphEdge(GraphNode* source, GraphNode* destination, bool undirected);
+    virtual ~GraphEdge();
 
-    void sourceUpdated(const QPointF& pt);
-    void destinationUpdated(const QPointF& pt);
+    virtual QRectF boundingRect() const;
+    virtual QPainterPath shape() const;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem* option, QWidget* widget);
+
+    void sourceUpdated();
+    void destinationUpdated();
 
 private:
-    qreal x1, y1, x2, y2;
+    void createDrawing();
+
+    GraphNode* source;
+    GraphNode* destination;
+    QGraphicsLineItem* mainLine;
+    QGraphicsLineItem* destinationArrowLine1;
+    QGraphicsLineItem* destinationArrowLine2;
+    QGraphicsLineItem* sourceArrowLine1;
+    QGraphicsLineItem* sourceArrowLine2;
+    QPainterPath* shapePath;
+    bool undirected;
 };
 
 #endif // GRAPHEDGE_H

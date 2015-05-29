@@ -1,24 +1,134 @@
-#include "graphedge.h"
+#include <QLineF>
 
-GraphEdge::GraphEdge(qreal _x1, qreal _y1, qreal _x2, qreal _y2)
+#include "graphedge.h"
+#include "graphnode.h"
+
+GraphEdge::GraphEdge(GraphNode* src, GraphNode* dst, bool _undirected)
 :
-  QGraphicsLineItem(_x1, _y1, _x2, _y2),
-  x1(_x1), y1(_y1), x2(_x2), y2(_y2)
+  QGraphicsItem(),
+  source(src),
+  destination(dst),
+  mainLine(NULL),
+  destinationArrowLine1(NULL),
+  destinationArrowLine2(NULL),
+  sourceArrowLine1(NULL),
+  sourceArrowLine2(NULL),
+  shapePath(NULL),
+  undirected(_undirected)
 {
+    createDrawing();
 }
 
-void GraphEdge::sourceUpdated(const QPointF& pt)
+GraphEdge::~GraphEdge()
 {
-    x1 = pt.x();
-    y1 = pt.y();
-    setLine(x1, y1, x2, y2);
+    delete mainLine;
+    delete destinationArrowLine1;
+    delete destinationArrowLine2;
+    delete sourceArrowLine1;
+    delete sourceArrowLine2;
+    delete shapePath;
+}
+
+void GraphEdge::createDrawing()
+{
+    delete mainLine;
+    delete destinationArrowLine1;
+    delete destinationArrowLine2;
+    delete sourceArrowLine1;
+    delete sourceArrowLine2;
+    delete shapePath;
+
+    shapePath = new QPainterPath();
+    QPointF sourceCenter = source->getCenter();
+    QPointF destinationCenter = destination->getCenter();
+
+    QLineF line(sourceCenter, destinationCenter);
+
+    QPointF pi(sourceCenter);
+    QPointF p0(pi.x() + source->getRadius(), pi.y());
+    QLineF radiusLine(pi, p0);
+    radiusLine.setAngle(line.angle());
+    pi = radiusLine.p2();
+    line.setP1(pi);
+
+    QPointF pf(destinationCenter);
+    p0 = QPointF(pf.x() + destination->getRadius(), pf.y());
+    radiusLine = QLineF(pf, p0);
+    radiusLine.setAngle(line.angle() - 180);
+    pf = radiusLine.p2();
+    line.setP2(pf);
+
+    QPointF p1(pf);
+    QPointF p2(p1.x() + 15, p1.y());
+    QLineF arrowLine1(p1, p2);
+    arrowLine1.setAngle(line.angle() - 135);
+    QLineF arrowLine2(p1, p2);
+    arrowLine2.setAngle(line.angle() + 135);
+
+    mainLine = new QGraphicsLineItem(line);
+    destinationArrowLine1 = new QGraphicsLineItem(arrowLine1);
+    destinationArrowLine2 = new QGraphicsLineItem(arrowLine2);
+
+    shapePath->moveTo(arrowLine1.p2());
+    shapePath->lineTo(pf);
+    shapePath->lineTo(arrowLine2.p2());
+
+    if (undirected) {
+        QPointF p3(pi);
+        QPointF p4(p3.x() + 15, p3.y());
+        QLineF arrowLine3(p3, p4);
+        arrowLine3.setAngle(line.angle() + 45);
+        QLineF arrowLine4(p3, p4);
+        arrowLine4.setAngle(line.angle() - 45);
+
+        sourceArrowLine1 = new QGraphicsLineItem(arrowLine3);
+        sourceArrowLine2 = new QGraphicsLineItem(arrowLine4);
+
+        shapePath->lineTo(arrowLine3.p2());
+        shapePath->lineTo(pi);
+        shapePath->lineTo(arrowLine4.p2());
+    }
+    else {
+        shapePath->lineTo(pi);
+    }
+}
+
+QRectF GraphEdge::boundingRect() const
+{
+    return shapePath->boundingRect();
+}
+
+QPainterPath GraphEdge::shape() const
+{
+    return *shapePath;
+}
+
+void GraphEdge::paint(QPainter *painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
+{
+//    painter->fillPath(shape(),QBrush(Qt::blue));
+    QPen pen(Qt::black, 2);
+    QBrush brush(Qt::red);
+    painter->setPen(pen);
+    painter->setBrush(brush);
+
+    mainLine->paint(painter, option, widget);
+    destinationArrowLine1->paint(painter, option, widget);
+    destinationArrowLine2->paint(painter, option, widget);
+
+    if (undirected) {
+        sourceArrowLine1->paint(painter, option, widget);
+        sourceArrowLine2->paint(painter, option, widget);
+    }
+}
+
+void GraphEdge::sourceUpdated()
+{
+    createDrawing();
     update();
 }
 
-void GraphEdge::destinationUpdated(const QPointF& pt)
+void GraphEdge::destinationUpdated()
 {
-    x2 = pt.x();
-    y2 = pt.y();
-    setLine(x1, y1, x2, y2);
+    createDrawing();
     update();
 }

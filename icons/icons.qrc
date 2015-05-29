@@ -4,5 +4,6 @@
         <file>directed_arrow_icon.bmp</file>
         <file>node_icon.bmp</file>
         <file>undirected_arrow_icon.bmp</file>
+        <file>moving_icon.bmp</file>
     </qresource>
 </RCC>

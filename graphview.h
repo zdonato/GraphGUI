@@ -10,6 +10,7 @@
 
 enum GraphAction {
     NONE,
+    MOVING,
     ADD_VERTEX,
     ADD_DIRECTED_EDGE,
     ADD_UNDIRECTED_EDGE
@@ -32,6 +33,7 @@ private:
     void removeItem(GraphEdge* edge);
     void changeLabel(GraphNode* node);
     void changeWeight(GraphEdge* edge);
+    void addEdge(bool undirected);
 
     QGraphicsItem* selectedItem;
     GraphNode* edgeSource;

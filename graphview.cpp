@@ -70,6 +70,22 @@ void GraphView::executeContextMenu(const QPoint& menuPosition)
     }
 }
 
+void GraphView::addEdge(bool undirected)
+{
+    if (edgeSource) {
+        GraphNode* edgeDestination = dynamic_cast<GraphNode*>(selectedItem);
+        if (edgeDestination && edgeSource != edgeDestination) {
+            GraphEdge* edge = new GraphEdge(edgeSource, edgeDestination, undirected);
+            edgeSource->addSourceEdge(edge);
+            edgeDestination->addDestinationEdge(edge);
+            scene()->addItem(edge);
+            edgeSource = NULL;
+        }
+    }
+    else
+        edgeSource = dynamic_cast<GraphNode*>(selectedItem);
+}
+
 void GraphView::mousePressEvent(QMouseEvent *event)
 {
     QPointF pt = mapToScene(event->pos());
@@ -89,24 +105,11 @@ void GraphView::mousePressEvent(QMouseEvent *event)
             break;
 
             case ADD_DIRECTED_EDGE:
-                if (edgeSource) {
-                    GraphNode* edgeDestination = dynamic_cast<GraphNode*>(selectedItem);
-                    if (edgeDestination && edgeSource != edgeDestination) {
-                        QPointF sourceCenter = edgeSource->getCenter();
-                        QPointF destinationCenter = edgeDestination->getCenter();
-                        GraphEdge* edge = new GraphEdge(sourceCenter.x(), sourceCenter.y(), destinationCenter.x(), destinationCenter.y());
-                        edgeSource->addSourceEdge(edge);
-                        edgeDestination->addDestinationEdge(edge);
-                        scene()->addItem(edge);
-                        edgeSource = NULL;
-                    }
-                }
-                else
-                    edgeSource = dynamic_cast<GraphNode*>(selectedItem);
+                addEdge(false);
             break;
 
             case ADD_UNDIRECTED_EDGE:
-
+                addEdge(true);
             break;
 
             default:{}
@@ -116,7 +119,7 @@ void GraphView::mousePressEvent(QMouseEvent *event)
 
 void GraphView::mouseMoveEvent(QMouseEvent *event)
 {
-    if (selectedItem && event->button() != Qt::RightButton) {
+    if (currentAction == MOVING && selectedItem && event->button() != Qt::RightButton) {
         QPointF pt = mapToScene(event->pos());
         GraphNode* node = dynamic_cast<GraphNode*>(selectedItem);
         if (node)

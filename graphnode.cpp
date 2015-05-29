@@ -14,6 +14,11 @@ QPointF GraphNode::getCenter()
     return QPointF(cx, cy);
 }
 
+qreal GraphNode::getRadius()
+{
+    return r;
+}
+
 void GraphNode::setLabel(QString _label)
 {
     label = _label;
@@ -49,9 +54,9 @@ void GraphNode::moveTo(const QPointF& pt)
     update();
 
     if (sourceEdge)
-        sourceEdge->sourceUpdated(pt);
+        sourceEdge->sourceUpdated();
     if (destinationEdge)
-        destinationEdge->destinationUpdated(pt);
+        destinationEdge->destinationUpdated();
 }
 
 void GraphNode::addSourceEdge(GraphEdge* e)

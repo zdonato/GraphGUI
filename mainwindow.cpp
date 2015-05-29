@@ -75,6 +75,8 @@ void MainWindow::toolBarOptionClicked(QAction* action)
         ui->graphicsView->setCurrentAction(ADD_DIRECTED_EDGE);
     else if (action == ui->actionAdd_Undirected_Edge)
         ui->graphicsView->setCurrentAction(ADD_UNDIRECTED_EDGE);
+    else if (action == ui->actionMove)
+        ui->graphicsView->setCurrentAction(MOVING);
 }
 
 void MainWindow::radiusChanged(int r)

@@ -4,6 +4,7 @@
 #include <QGraphicsEllipseItem>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
+
 #include "graphedge.h"
 
 class GraphNode : public QGraphicsEllipseItem
@@ -11,14 +12,16 @@ class GraphNode : public QGraphicsEllipseItem
 public:
     GraphNode(qreal x, qreal y, qreal r);
     virtual ~GraphNode(){}
+
     QPointF getCenter();
+    qreal getRadius();
+    void setLabel(QString label);
+    void setRadius(qreal r);
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     void moveTo(const QPointF& pt);
     void addSourceEdge(GraphEdge* e);
     void addDestinationEdge(GraphEdge* e);
-    void setLabel(QString label);
-    void setRadius(qreal r);
 
 private:
     QString label;
