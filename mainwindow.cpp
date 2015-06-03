@@ -34,6 +34,13 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::resizeEvent(QResizeEvent * event)
+{
+    QSize size = event->size();
+    size.setHeight(size.height() - 68); // consider the size of toolBar and statusBar
+    ui->graphicsView->resize(size);
+}
+
 void MainWindow::menuOptionClicked(QAction* action)
 {
     if (action == ui->actionUnweighted_graph) {
@@ -63,7 +70,7 @@ void MainWindow::menuOptionClicked(QAction* action)
 
     }
     else if (action == ui->actionQuit) {
-
+        close();
     }
 }
 

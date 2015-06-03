@@ -15,6 +15,7 @@ public:
 
     QPointF getCenter();
     qreal getRadius();
+    QString getLabel();
     void setLabel(QString label);
     void setRadius(qreal r);
 

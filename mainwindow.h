@@ -24,6 +24,7 @@ protected slots:
     void menuOptionClicked(QAction* action);
     void toolBarOptionClicked(QAction* action);
     void radiusChanged(int r);
+    void resizeEvent(QResizeEvent *);
 
 };
 

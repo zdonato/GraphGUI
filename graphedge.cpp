@@ -13,8 +13,10 @@ GraphEdge::GraphEdge(GraphNode* src, GraphNode* dst, bool _undirected)
   destinationArrowLine2(NULL),
   sourceArrowLine1(NULL),
   sourceArrowLine2(NULL),
+  weightText(NULL),
   shapePath(NULL),
-  undirected(_undirected)
+  undirected(_undirected),
+  weight(10)
 {
     createDrawing();
 }
@@ -26,6 +28,7 @@ GraphEdge::~GraphEdge()
     delete destinationArrowLine2;
     delete sourceArrowLine1;
     delete sourceArrowLine2;
+    delete weightText;
     delete shapePath;
 }
 
@@ -36,6 +39,7 @@ void GraphEdge::createDrawing()
     delete destinationArrowLine2;
     delete sourceArrowLine1;
     delete sourceArrowLine2;
+    delete weightText;
     delete shapePath;
 
     shapePath = new QPainterPath();
@@ -90,7 +94,54 @@ void GraphEdge::createDrawing()
     }
     else {
         shapePath->lineTo(pi);
+        sourceArrowLine1 = NULL;
+        sourceArrowLine2 = NULL;
     }
+
+//    if (weight) {
+//        p0 = line.pointAt(0.5);
+//        QPointF pt(p0.x() + 5, p0.y());
+//        QLineF textLine(p0, pt);
+//        textLine.setAngle(line.angle() + 90);
+//        weightText = new QGraphicsTextItem(QString::number(weight));
+//        weightText->setX(textLine.p2().x());
+//        weightText->setY(textLine.p2().y());
+//        weightText->setRotation(line.angle());
+//    }
+//    else
+//        weightText = NULL;
+}
+
+int GraphEdge::getWeight()
+{
+    return weight;
+}
+
+void GraphEdge::setWeight(int w)
+{
+    weight = w;
+}
+
+bool GraphEdge::isUndirected()
+{
+    return undirected;
+}
+
+void GraphEdge::setUndirected(bool _undirected)
+{
+    undirected = _undirected;
+    createDrawing();
+    update();
+}
+
+GraphNode* GraphEdge::getSourceNode()
+{
+    return source;
+}
+
+GraphNode* GraphEdge::getDestinationNode()
+{
+    return destination;
 }
 
 QRectF GraphEdge::boundingRect() const
@@ -111,14 +162,26 @@ void GraphEdge::paint(QPainter *painter, const QStyleOptionGraphicsItem* option,
     painter->setPen(pen);
     painter->setBrush(brush);
 
-    mainLine->paint(painter, option, widget);
-    destinationArrowLine1->paint(painter, option, widget);
-    destinationArrowLine2->paint(painter, option, widget);
+//    QPointF sourceCenter = source->getCenter();
+//    QPointF destinationCenter = destination->getCenter();
+//    QLineF line(sourceCenter, destinationCenter);
+//    bool drawArrow = line.length() > 2*source->getRadius() && line.length() > 2*destination->getRadius();
 
-    if (undirected) {
-        sourceArrowLine1->paint(painter, option, widget);
-        sourceArrowLine2->paint(painter, option, widget);
-    }
+//    if (drawArrow) {
+        mainLine->paint(painter, option, widget);
+
+        destinationArrowLine1->paint(painter, option, widget);
+        destinationArrowLine2->paint(painter, option, widget);
+
+        if (undirected) {
+            sourceArrowLine1->paint(painter, option, widget);
+            sourceArrowLine2->paint(painter, option, widget);
+        }
+//    }
+
+//    if (weightText)
+//        painter->drawText(weightText->pos().toPoint(), QString::number(weight));
+//        weightText->paint(painter, option, widget);
 }
 
 void GraphEdge::sourceUpdated()
@@ -129,6 +192,15 @@ void GraphEdge::sourceUpdated()
 
 void GraphEdge::destinationUpdated()
 {
+    createDrawing();
+    update();
+}
+
+void GraphEdge::changeDirection()
+{
+    GraphNode* temp = source;
+    source = destination;
+    destination = temp;
     createDrawing();
     update();
 }

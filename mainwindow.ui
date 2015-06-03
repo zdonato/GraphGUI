@@ -20,8 +20,11 @@
       <x>0</x>
       <y>0</y>
       <width>401</width>
-      <height>281</height>
+      <height>280</height>
      </rect>
+    </property>
+    <property name="resizeAnchor">
+     <enum>QGraphicsView::NoAnchor</enum>
     </property>
    </widget>
   </widget>

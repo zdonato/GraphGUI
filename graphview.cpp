@@ -16,7 +16,7 @@ GraphView::GraphView(QWidget *parent)
     nodeRadius(15)
 {
     setScene(new QGraphicsScene());
-    scene()->setSceneRect(this->rect());
+    scene()->setSceneRect(rect());
 }
 
 GraphView::~GraphView()
@@ -60,13 +60,40 @@ void GraphView::executeContextMenu(const QPoint& menuPosition)
     }
     else if (edge){
         QAction *changeWeightAction = menu.addAction("Change weight");
+
+        QMenu *changeDirectionMenu = new QMenu("Change direction");
+        menu.addMenu(changeDirectionMenu);
+        QString sourceLabel = edge->getSourceNode()->getLabel();
+        if (sourceLabel.isEmpty())
+            sourceLabel = "no_label";
+        QString destinationLabel = edge->getDestinationNode()->getLabel();
+        if (destinationLabel.isEmpty())
+            destinationLabel = "no_label";
+
+        QAction *changeDirectionSDAction = changeDirectionMenu->addAction(sourceLabel + " -> " + destinationLabel);
+        QAction *changeDirectionDSAction = changeDirectionMenu->addAction(destinationLabel + " -> " + sourceLabel);
+        QAction *changeUndirectedAction = changeDirectionMenu->addAction("Change to undirected");
+
+        if (edge->isUndirected())
+            changeUndirectedAction->setEnabled(false);
+        else
+            changeDirectionSDAction->setEnabled(false);
+
         QAction *deleteAction = menu.addAction("Delete edge");
         QAction *selectedAction = menu.exec(menuPosition);
 
         if (selectedAction == changeWeightAction)
-          changeWeight(edge);
+            changeWeight(edge);
         else if (selectedAction == deleteAction)
-          removeItem(edge);
+            removeItem(edge);
+        else if (selectedAction == changeDirectionSDAction)
+            edge->setUndirected(false);
+        else if (selectedAction == changeDirectionDSAction) {
+            edge->setUndirected(false);
+            edge->changeDirection();
+        }
+        else if (selectedAction == changeUndirectedAction)
+            edge->setUndirected(true);
     }
 }
 
@@ -122,8 +149,13 @@ void GraphView::mouseMoveEvent(QMouseEvent *event)
     if (currentAction == MOVING && selectedItem && event->button() != Qt::RightButton) {
         QPointF pt = mapToScene(event->pos());
         GraphNode* node = dynamic_cast<GraphNode*>(selectedItem);
-        if (node)
-            node->moveTo(pt);
+        if (node) {
+            QRect rect = this->geometry();
+
+            if (event->pos().x() - node->getRadius() > rect.left() && event->pos().x() + node->getRadius() < rect.right() &&
+                event->pos().y() - node->getRadius() > rect.top() && event->pos().y() + node->getRadius() < rect.bottom())
+                node->moveTo(pt);
+        }
     }
 }
 
@@ -139,7 +171,10 @@ void GraphView::removeItem(GraphNode* node)
 
 void GraphView::removeItem(GraphEdge* edge)
 {
+    edge->getSourceNode()->addSourceEdge(NULL);
+    edge->getDestinationNode()->addDestinationEdge(NULL);
     scene()->removeItem(edge);
+    delete edge;
 }
 
 void GraphView::changeLabel(GraphNode* node)

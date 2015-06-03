@@ -19,6 +19,11 @@ qreal GraphNode::getRadius()
     return r;
 }
 
+QString GraphNode::getLabel()
+{
+    return label;
+}
+
 void GraphNode::setLabel(QString _label)
 {
     label = _label;

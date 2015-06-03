@@ -14,12 +14,22 @@ public:
     GraphEdge(GraphNode* source, GraphNode* destination, bool undirected);
     virtual ~GraphEdge();
 
+    int getWeight();
+    void setWeight(int w);
+
+    bool isUndirected();
+    void setUndirected(bool undirected);
+
+    GraphNode* getSourceNode();
+    GraphNode* getDestinationNode();
+
     virtual QRectF boundingRect() const;
     virtual QPainterPath shape() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem* option, QWidget* widget);
 
     void sourceUpdated();
     void destinationUpdated();
+    void changeDirection();
 
 private:
     void createDrawing();
@@ -31,8 +41,10 @@ private:
     QGraphicsLineItem* destinationArrowLine2;
     QGraphicsLineItem* sourceArrowLine1;
     QGraphicsLineItem* sourceArrowLine2;
+    QGraphicsTextItem* weightText;
     QPainterPath* shapePath;
     bool undirected;
+    int weight;
 };
 
 #endif // GRAPHEDGE_H
