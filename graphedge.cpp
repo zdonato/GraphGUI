@@ -18,7 +18,7 @@ GraphEdge::GraphEdge(GraphNode* src, GraphNode* dst, bool _undirected)
   undirected(_undirected),
   weight(10)
 {
-    createDrawing();
+    updateDrawing();
 }
 
 GraphEdge::~GraphEdge()
@@ -32,7 +32,7 @@ GraphEdge::~GraphEdge()
     delete shapePath;
 }
 
-void GraphEdge::createDrawing()
+void GraphEdge::updateDrawing()
 {
     delete mainLine;
     delete destinationArrowLine1;
@@ -130,8 +130,7 @@ bool GraphEdge::isUndirected()
 void GraphEdge::setUndirected(bool _undirected)
 {
     undirected = _undirected;
-    createDrawing();
-    update();
+    updateDrawing();
 }
 
 GraphNode* GraphEdge::getSourceNode()
@@ -186,14 +185,12 @@ void GraphEdge::paint(QPainter *painter, const QStyleOptionGraphicsItem* option,
 
 void GraphEdge::sourceUpdated()
 {
-    createDrawing();
-    update();
+    updateDrawing();
 }
 
 void GraphEdge::destinationUpdated()
 {
-    createDrawing();
-    update();
+    updateDrawing();
 }
 
 void GraphEdge::changeDirection()
@@ -201,6 +198,5 @@ void GraphEdge::changeDirection()
     GraphNode* temp = source;
     source = destination;
     destination = temp;
-    createDrawing();
-    update();
+    updateDrawing();
 }

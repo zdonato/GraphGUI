@@ -14,10 +14,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     QLabel* radiusLabel = new QLabel("Vertex radius:", ui->toolBar);
-    QSpinBox* radiusEdit = new QSpinBox(ui->toolBar);
+    radiusEdit = new QSpinBox(ui->toolBar);
     radiusEdit->setRange(8, 50);
     radiusEdit->stepBy(1);
     radiusEdit->setValue(15);
+    radiusEdit->setEnabled(false);
     ui->toolBar->addSeparator();
     ui->toolBar->addWidget(radiusLabel);
     ui->toolBar->addWidget(radiusEdit);
@@ -43,20 +44,26 @@ void MainWindow::resizeEvent(QResizeEvent * event)
 
 void MainWindow::menuOptionClicked(QAction* action)
 {
-    if (action == ui->actionUnweighted_graph) {
-
+    if (action == ui->actionNew_Unweighted_Directed_Graph) {
+        newGraph(false, false);
     }
-    else if (action == ui->actionWeighted_Graph) {
-
+    else if (action == ui->actionNew_Unweighted_Undirected_Graph) {
+        newGraph(false, true);
+    }
+    if (action == ui->actionNew_Weighted_Directed_Graph) {
+        newGraph(true, false);
+    }
+    else if (action == ui->actionNew_Weighted_Undirected_Graph) {
+        newGraph(true, true);
     }
     else if (action == ui->actionOpen) {
-
+        openGraph();
     }
     else if (action == ui->actionSave) {
-
+        saveGraph();
     }
     else if (action == ui->actionSave_as) {
-
+        saveGraphAs();
     }
     else if (action == ui->actionPNG) {
         QString filePath = QFileDialog::getSaveFileName(this, "Export to PNG", QCoreApplication::applicationDirPath(), "PNG (*.png)");
@@ -67,7 +74,7 @@ void MainWindow::menuOptionClicked(QAction* action)
         }
     }
     else if (action == ui->actionClose) {
-
+        closeGraph();
     }
     else if (action == ui->actionQuit) {
         close();
@@ -90,3 +97,87 @@ void MainWindow::radiusChanged(int r)
 {
     ui->graphicsView->setNodeRadius(r);
 }
+
+void MainWindow::newGraph(bool weighted, bool undirected)
+{
+//    if (fileOpen)
+//        closeGraph();
+
+    ui->graphicsView->setGraphWeighted(weighted);
+    ui->graphicsView->setGraphUndirected(undirected);
+
+    ui->graphicsView->setEnabled(true);
+    ui->actionSave->setEnabled(true);
+    ui->actionSave_as->setEnabled(true);
+    ui->actionPNG->setEnabled(true);
+    ui->actionClose->setEnabled(true);
+    ui->actionMove->setEnabled(true);
+    ui->actionAdd_Vertex->setEnabled(true);
+    ui->actionAdd_Undirected_Edge->setEnabled(true);
+    radiusEdit->setEnabled(true);
+
+    if (!undirected)
+        ui->actionAdd_Directed_Edge->setEnabled(true);
+
+    setWindowTitle("Graph Algorithms - New");
+}
+
+void MainWindow::closeGraph()
+{
+//    if (!graphAlreadySavedBefore) {
+//        if (userWantsToSave)
+//            saveGraph();
+//        else
+           ui->graphicsView->scene()->clear();
+//    }
+
+    ui->graphicsView->setEnabled(false);
+    ui->actionSave->setEnabled(false);
+    ui->actionSave_as->setEnabled(false);
+    ui->actionPNG->setEnabled(false);
+    ui->actionClose->setEnabled(false);
+    ui->actionMove->setEnabled(false);
+    ui->actionAdd_Vertex->setEnabled(false);
+    ui->actionAdd_Undirected_Edge->setEnabled(false);
+    ui->actionAdd_Directed_Edge->setEnabled(false);
+    radiusEdit->setEnabled(false);
+
+    setWindowTitle("Graph Algorithms");
+}
+
+void MainWindow::openGraph()
+{
+//    if (fileOpen)
+//        closeGraph();
+
+    QString filePath = QFileDialog::getOpenFileName(this, "Open Graph", QCoreApplication::applicationDirPath(), "Graph Algorithms File (*.gaf)");
+
+    if (!filePath.isNull()) {
+
+        // read graph from file here
+        // dont forget to enable the menu functions
+
+        QFileInfo fileInfo(filePath);
+        setWindowTitle("Graph Algorithms - " + fileInfo.fileName());
+    }
+}
+
+void MainWindow::saveGraph()
+{
+//    if (graphAlreadySavedBefore)
+//        save graph to file here
+//    else
+//        saveGraphAs();
+}
+
+void MainWindow::saveGraphAs()
+{
+    QString filePath = QFileDialog::getSaveFileName(this, "Save Graph", QCoreApplication::applicationDirPath(), "Graph Algorithms File (*.gaf)");
+
+    if (!filePath.isNull()) {
+        saveGraph();
+        QFileInfo fileInfo(filePath);
+        setWindowTitle("Graph Algorithms - " + fileInfo.fileName());
+    }
+}
+

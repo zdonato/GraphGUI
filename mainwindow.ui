@@ -15,6 +15,9 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="GraphView" name="graphicsView">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>0</x>
@@ -45,12 +48,26 @@
      <property name="title">
       <string>New</string>
      </property>
-     <addaction name="actionUnweighted_graph"/>
-     <addaction name="actionWeighted_Graph"/>
+     <widget class="QMenu" name="menuUnweighted_Graph">
+      <property name="title">
+       <string>Unweighted Graph</string>
+      </property>
+      <addaction name="actionNew_Unweighted_Directed_Graph"/>
+      <addaction name="actionNew_Unweighted_Undirected_Graph"/>
+     </widget>
+     <widget class="QMenu" name="menuWeighted_Graph">
+      <property name="title">
+       <string>Weighted Graph</string>
+      </property>
+      <addaction name="actionNew_Weighted_Directed_Graph"/>
+      <addaction name="actionNew_Weighted_Undirected_Graph"/>
+     </widget>
+     <addaction name="menuUnweighted_Graph"/>
+     <addaction name="menuWeighted_Graph"/>
     </widget>
     <widget class="QMenu" name="menuExport">
      <property name="enabled">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
      <property name="title">
       <string>Export</string>
@@ -70,6 +87,9 @@
      <string>Graph</string>
     </property>
     <widget class="QMenu" name="menuAdd_Edge">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="title">
       <string>Add Edge</string>
      </property>
@@ -128,11 +148,6 @@
     <string>Quit</string>
    </property>
   </action>
-  <action name="actionUnweighted_graph">
-   <property name="text">
-    <string>Unweighted Graph</string>
-   </property>
-  </action>
   <action name="actionSave">
    <property name="enabled">
     <bool>false</bool>
@@ -153,6 +168,9 @@
    </property>
   </action>
   <action name="actionAdd_vertex">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Add Vertex</string>
    </property>
@@ -172,15 +190,10 @@
     <string>PNG</string>
    </property>
   </action>
-  <action name="actionWeighted_Graph">
+  <action name="actionAdd_Vertex">
    <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="text">
-    <string>Weighted Graph</string>
-   </property>
-  </action>
-  <action name="actionAdd_Vertex">
    <property name="icon">
     <iconset resource="icons/icons.qrc">
      <normaloff>:/node_icon.bmp</normaloff>
@@ -191,6 +204,9 @@
    </property>
   </action>
   <action name="actionAdd_Directed_Edge">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="icons/icons.qrc">
      <normaloff>:/directed_arrow_icon.bmp</normaloff>:/directed_arrow_icon.bmp</iconset>
@@ -200,6 +216,9 @@
    </property>
   </action>
   <action name="actionAdd_Undirected_Edge">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="icons/icons.qrc">
      <normaloff>:/undirected_arrow_icon.bmp</normaloff>:/undirected_arrow_icon.bmp</iconset>
@@ -209,12 +228,35 @@
    </property>
   </action>
   <action name="actionMove">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="icons/icons.qrc">
      <normaloff>:/moving_icon.bmp</normaloff>:/moving_icon.bmp</iconset>
    </property>
    <property name="text">
     <string>Move</string>
+   </property>
+  </action>
+  <action name="actionNew_Unweighted_Directed_Graph">
+   <property name="text">
+    <string>Directed</string>
+   </property>
+  </action>
+  <action name="actionNew_Unweighted_Undirected_Graph">
+   <property name="text">
+    <string>Undirected</string>
+   </property>
+  </action>
+  <action name="actionNew_Weighted_Directed_Graph">
+   <property name="text">
+    <string>Directed</string>
+   </property>
+  </action>
+  <action name="actionNew_Weighted_Undirected_Graph">
+   <property name="text">
+    <string>Undirected</string>
    </property>
   </action>
  </widget>

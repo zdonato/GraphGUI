@@ -56,7 +56,6 @@ void GraphNode::moveTo(const QPointF& pt)
     newRect.moveLeft(cx - r);
     newRect.moveTop(cy - r);
     setRect(newRect);
-    update();
 
     if (sourceEdge)
         sourceEdge->sourceUpdated();

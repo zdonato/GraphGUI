@@ -14,6 +14,8 @@ public:
     GraphEdge(GraphNode* source, GraphNode* destination, bool undirected);
     virtual ~GraphEdge();
 
+    void updateDrawing();
+
     int getWeight();
     void setWeight(int w);
 
@@ -31,9 +33,7 @@ public:
     void destinationUpdated();
     void changeDirection();
 
-private:
-    void createDrawing();
-
+private:    
     GraphNode* source;
     GraphNode* destination;
     QGraphicsLineItem* mainLine;

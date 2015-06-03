@@ -26,6 +26,8 @@ public:
 
     void setCurrentAction(GraphAction action);
     void setNodeRadius(int radius);
+    void setGraphWeighted(bool weighted);
+    void setGraphUndirected(bool undirected);
 
 private:
     void executeContextMenu(const QPoint& menuPosition);
@@ -39,6 +41,8 @@ private:
     GraphNode* edgeSource;
     GraphAction currentAction;
     int nodeRadius;
+    bool weightedGraph;
+    bool undirectedGraph;
 
 protected slots:
     void mousePressEvent(QMouseEvent *event);

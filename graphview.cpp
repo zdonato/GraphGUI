@@ -13,7 +13,9 @@ GraphView::GraphView(QWidget *parent)
     selectedItem(NULL),
     edgeSource(NULL),
     currentAction(NONE),
-    nodeRadius(15)
+    nodeRadius(15),
+    weightedGraph(false),
+    undirectedGraph(false)
 {
     setScene(new QGraphicsScene());
     scene()->setSceneRect(rect());
@@ -31,9 +33,31 @@ void GraphView::setNodeRadius(int radius)
     QListIterator<QGraphicsItem*> it(scene()->items());
     while (it.hasNext()) {
         GraphNode* node = dynamic_cast<GraphNode*>(it.next());
+
         if (node)
             node->setRadius(radius);
     }
+
+    // After changing the radius of every node, we recalculate the edges
+    it.toFront();
+    while (it.hasNext()) {
+        GraphEdge* edge = dynamic_cast<GraphEdge*>(it.next());
+
+        if (edge)
+            edge->updateDrawing();
+    }
+
+    scene()->update();
+}
+
+void GraphView::setGraphWeighted(bool weighted)
+{
+    weightedGraph = weighted;
+}
+
+void GraphView::setGraphUndirected(bool undirected)
+{
+    undirectedGraph = undirected;
 }
 
 void GraphView::setCurrentAction(GraphAction action)
@@ -61,23 +85,29 @@ void GraphView::executeContextMenu(const QPoint& menuPosition)
     else if (edge){
         QAction *changeWeightAction = menu.addAction("Change weight");
 
-        QMenu *changeDirectionMenu = new QMenu("Change direction");
-        menu.addMenu(changeDirectionMenu);
-        QString sourceLabel = edge->getSourceNode()->getLabel();
-        if (sourceLabel.isEmpty())
-            sourceLabel = "no_label";
-        QString destinationLabel = edge->getDestinationNode()->getLabel();
-        if (destinationLabel.isEmpty())
-            destinationLabel = "no_label";
+        QAction *changeDirectionSDAction(NULL);
+        QAction *changeDirectionDSAction(NULL);
+        QAction *changeUndirectedAction(NULL);
 
-        QAction *changeDirectionSDAction = changeDirectionMenu->addAction(sourceLabel + " -> " + destinationLabel);
-        QAction *changeDirectionDSAction = changeDirectionMenu->addAction(destinationLabel + " -> " + sourceLabel);
-        QAction *changeUndirectedAction = changeDirectionMenu->addAction("Change to undirected");
+        if (!undirectedGraph) {
+            QMenu *changeDirectionMenu = new QMenu("Change direction");
+            menu.addMenu(changeDirectionMenu);
+            QString sourceLabel = edge->getSourceNode()->getLabel();
+            if (sourceLabel.isEmpty())
+                sourceLabel = "no_label";
+            QString destinationLabel = edge->getDestinationNode()->getLabel();
+            if (destinationLabel.isEmpty())
+                destinationLabel = "no_label";
 
-        if (edge->isUndirected())
-            changeUndirectedAction->setEnabled(false);
-        else
-            changeDirectionSDAction->setEnabled(false);
+            changeDirectionSDAction = changeDirectionMenu->addAction(sourceLabel + " -> " + destinationLabel);
+            changeDirectionDSAction = changeDirectionMenu->addAction(destinationLabel + " -> " + sourceLabel);
+            changeUndirectedAction = changeDirectionMenu->addAction("Change to undirected");
+
+            if (edge->isUndirected())
+                changeUndirectedAction->setEnabled(false);
+            else
+                changeDirectionSDAction->setEnabled(false);
+        }
 
         QAction *deleteAction = menu.addAction("Delete edge");
         QAction *selectedAction = menu.exec(menuPosition);
@@ -94,6 +124,9 @@ void GraphView::executeContextMenu(const QPoint& menuPosition)
         }
         else if (selectedAction == changeUndirectedAction)
             edge->setUndirected(true);
+
+        if (selectedAction)
+            scene()->update();
     }
 }
 
@@ -145,7 +178,7 @@ void GraphView::mousePressEvent(QMouseEvent *event)
 }
 
 void GraphView::mouseMoveEvent(QMouseEvent *event)
-{
+{    
     if (currentAction == MOVING && selectedItem && event->button() != Qt::RightButton) {
         QPointF pt = mapToScene(event->pos());
         GraphNode* node = dynamic_cast<GraphNode*>(selectedItem);
@@ -153,10 +186,12 @@ void GraphView::mouseMoveEvent(QMouseEvent *event)
             QRect rect = this->geometry();
 
             if (event->pos().x() - node->getRadius() > rect.left() && event->pos().x() + node->getRadius() < rect.right() &&
-                event->pos().y() - node->getRadius() > rect.top() && event->pos().y() + node->getRadius() < rect.bottom())
-                node->moveTo(pt);
+                event->pos().y() - node->getRadius() > rect.top() && event->pos().y() + node->getRadius() < rect.bottom()) {
+                node->moveTo(pt);            
+                scene()->update();
+            }
         }
-    }
+    }    
 }
 
 void GraphView::mouseReleaseEvent(QMouseEvent* /*event*/)
@@ -182,10 +217,13 @@ void GraphView::changeLabel(GraphNode* node)
     bool ok;
     QString newLabel = QInputDialog::getText(this, "Change Label", "New label:", QLineEdit::Normal, "", &ok);
     if (ok)
-      node->setLabel(newLabel);
+        node->setLabel(newLabel);
 }
 
 void GraphView::changeWeight(GraphEdge* edge)
 {
-
+    bool ok;
+    int newWeight = QInputDialog::getInt(this, "Change Label", "New weight:", edge->getWeight(), 0, 999999, 1, &ok);
+    if (ok)
+        edge->setWeight(newWeight);
 }

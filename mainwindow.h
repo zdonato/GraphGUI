@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QPushButton>
+#include <QSpinBox>
 #include "graphview.h"
 
 namespace Ui {
@@ -19,6 +20,13 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    QSpinBox* radiusEdit;
+
+    void newGraph(bool weighted, bool undirected);
+    void closeGraph();
+    void openGraph();
+    void saveGraph();
+    void saveGraphAs();
 
 protected slots:
     void menuOptionClicked(QAction* action);
