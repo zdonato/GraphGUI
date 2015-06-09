@@ -3,7 +3,7 @@
 GraphNode::GraphNode(qreal x, qreal y, qreal _r)
 :
   QGraphicsEllipseItem(x - _r, y - _r, _r + _r, _r + _r),
-  label(""), cx(x), cy(y), r(_r), sourceEdge(NULL), destinationEdge(NULL)
+  label(""), cx(x), cy(y), r(_r)
 {
     setFlag(ItemIsMovable);
     setFlag(ItemSendsGeometryChanges);
@@ -57,18 +57,45 @@ void GraphNode::moveTo(const QPointF& pt)
     newRect.moveTop(cy - r);
     setRect(newRect);
 
-    if (sourceEdge)
-        sourceEdge->sourceUpdated();
-    if (destinationEdge)
-        destinationEdge->destinationUpdated();
+    QListIterator<GraphEdge*> it(sourceEdges);
+    while (it.hasNext())
+        it.next()->sourceUpdated();
+
+    it = QListIterator<GraphEdge*>(destinationEdges);
+    while (it.hasNext()) {
+        GraphEdge* edge = it.next();
+        // The undirected edges were already updated because the node is both source and destination
+        if (!edge->isUndirected())
+            edge->destinationUpdated();
+    }
+}
+
+QList<GraphEdge*>& GraphNode::getSourceEdges()
+{
+    return sourceEdges;
+}
+
+QList<GraphEdge*>& GraphNode::getDestinationEdges()
+{
+    return destinationEdges;
 }
 
 void GraphNode::addSourceEdge(GraphEdge* e)
 {
-    sourceEdge = e;
+    sourceEdges.append(e);
 }
 
 void GraphNode::addDestinationEdge(GraphEdge* e)
 {
-    destinationEdge = e;
+    destinationEdges.append(e);
+}
+
+void GraphNode::removeSourceEdge(GraphEdge* e)
+{
+    sourceEdges.removeOne(e);
+}
+
+void GraphNode::removeDestinationEdge(GraphEdge* e)
+{
+    destinationEdges.removeOne(e);
 }

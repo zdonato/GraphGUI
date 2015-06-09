@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QLabel>
 #include <QMainWindow>
 #include <QPushButton>
 #include <QSpinBox>
@@ -21,6 +22,7 @@ public:
 private:
     Ui::MainWindow *ui;
     QSpinBox* radiusEdit;
+    QLabel* status;
 
     void newGraph(bool weighted, bool undirected);
     void closeGraph();

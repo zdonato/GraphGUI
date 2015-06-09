@@ -22,6 +22,10 @@ public:
     bool isUndirected();
     void setUndirected(bool undirected);
 
+    void setBold(bool bold);
+    void setDrawArrows(bool draw);
+    void setDrawWeight(bool draw);
+
     GraphNode* getSourceNode();
     GraphNode* getDestinationNode();
 
@@ -45,6 +49,9 @@ private:
     QPainterPath* shapePath;
     bool undirected;
     int weight;
+    bool bold;
+    bool drawArrows;
+    bool drawWeight;
 };
 
 #endif // GRAPHEDGE_H

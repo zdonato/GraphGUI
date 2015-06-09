@@ -83,7 +83,10 @@ void GraphView::executeContextMenu(const QPoint& menuPosition)
           removeItem(node);
     }
     else if (edge){
-        QAction *changeWeightAction = menu.addAction("Change weight");
+        QAction *changeWeightAction(NULL);
+
+        if (weightedGraph)
+            changeWeightAction = menu.addAction("Change weight");
 
         QAction *changeDirectionSDAction(NULL);
         QAction *changeDirectionDSAction(NULL);
@@ -112,21 +115,22 @@ void GraphView::executeContextMenu(const QPoint& menuPosition)
         QAction *deleteAction = menu.addAction("Delete edge");
         QAction *selectedAction = menu.exec(menuPosition);
 
-        if (selectedAction == changeWeightAction)
-            changeWeight(edge);
-        else if (selectedAction == deleteAction)
-            removeItem(edge);
-        else if (selectedAction == changeDirectionSDAction)
-            edge->setUndirected(false);
-        else if (selectedAction == changeDirectionDSAction) {
-            edge->setUndirected(false);
-            edge->changeDirection();
-        }
-        else if (selectedAction == changeUndirectedAction)
-            edge->setUndirected(true);
+        if (selectedAction) {
+            if (selectedAction == changeWeightAction)
+                changeWeight(edge);
+            else if (selectedAction == deleteAction)
+                removeItem(edge);
+            else if (selectedAction == changeDirectionSDAction)
+                edge->setUndirected(false);
+            else if (selectedAction == changeDirectionDSAction) {
+                edge->setUndirected(false);
+                edge->changeDirection();
+            }
+            else if (selectedAction == changeUndirectedAction)
+                edge->setUndirected(true);
 
-        if (selectedAction)
             scene()->update();
+        }
     }
 }
 
@@ -136,8 +140,17 @@ void GraphView::addEdge(bool undirected)
         GraphNode* edgeDestination = dynamic_cast<GraphNode*>(selectedItem);
         if (edgeDestination && edgeSource != edgeDestination) {
             GraphEdge* edge = new GraphEdge(edgeSource, edgeDestination, undirected);
+            edge->setDrawArrows(!undirectedGraph);
+            edge->setDrawWeight(weightedGraph);
+
             edgeSource->addSourceEdge(edge);
             edgeDestination->addDestinationEdge(edge);
+
+            if (undirected) {
+                edgeSource->addDestinationEdge(edge);
+                edgeDestination->addSourceEdge(edge);
+            }
+
             scene()->addItem(edge);
             edgeSource = NULL;
         }
@@ -201,13 +214,32 @@ void GraphView::mouseReleaseEvent(QMouseEvent* /*event*/)
 
 void GraphView::removeItem(GraphNode* node)
 {
-//    scene->removeItem(edge);
+    QList<GraphEdge*>& edges = node->getSourceEdges();
+    QListIterator<GraphEdge*> it(edges);
+
+    while (it.hasNext())
+        removeItem(it.next());
+
+    edges = node->getDestinationEdges();
+    it = QListIterator<GraphEdge*>(edges);
+
+    while (it.hasNext())
+        removeItem(it.next());
+
+    scene()->removeItem(node);
+    delete node;
 }
 
 void GraphView::removeItem(GraphEdge* edge)
 {
-    edge->getSourceNode()->addSourceEdge(NULL);
-    edge->getDestinationNode()->addDestinationEdge(NULL);
+    edge->getSourceNode()->removeSourceEdge(edge);
+    edge->getDestinationNode()->removeDestinationEdge(edge);
+
+    if (edge->isUndirected()) {
+        edge->getSourceNode()->removeDestinationEdge(edge);
+        edge->getDestinationNode()->removeSourceEdge(edge);
+    }
+
     scene()->removeItem(edge);
     delete edge;
 }
@@ -224,6 +256,8 @@ void GraphView::changeWeight(GraphEdge* edge)
 {
     bool ok;
     int newWeight = QInputDialog::getInt(this, "Change Label", "New weight:", edge->getWeight(), 0, 999999, 1, &ok);
-    if (ok)
+    if (ok) {
         edge->setWeight(newWeight);
+        edge->update();
+    }
 }

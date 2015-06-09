@@ -1,18 +1,17 @@
+#include <cstdio>
+#include <fstream>
+#include <iostream>
+#include <string>
 #include <QFileDialog>
 #include <QGraphicsView>
 #include <QLabel>
 #include <QSpinBox>
-#include <QVBoxLayout>
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <cstdio>
-
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
+
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -30,6 +29,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->toolBar->addWidget(radiusLabel);
     ui->toolBar->addWidget(radiusEdit);
 
+    status = new QLabel();
+    ui->statusBar->addWidget(status);
+
     connect(ui->menuBar, SIGNAL(triggered(QAction*)), this, SLOT(menuOptionClicked(QAction*)));
     connect(ui->toolBar, SIGNAL(actionTriggered(QAction*)), this, SLOT(toolBarOptionClicked(QAction*)));
     connect(radiusEdit, SIGNAL(valueChanged(int)), this, SLOT(radiusChanged(int)));
@@ -40,6 +42,8 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete radiusEdit;
+    delete status;
 }
 
 void MainWindow::resizeEvent(QResizeEvent * event)
@@ -126,7 +130,21 @@ void MainWindow::newGraph(bool weighted, bool undirected)
     if (!undirected)
         ui->actionAdd_Directed_Edge->setEnabled(true);
 
+    QString statusMessage("");
+    if (weighted)
+        statusMessage += "Weighted";
+    else
+        statusMessage += "Unweighted";
+
+    if (undirected)
+        statusMessage += " undirected";
+    else
+        statusMessage += " directed";
+
+    statusMessage += " graph";
+
     setWindowTitle("Graph Algorithms - New");
+    status->setText(statusMessage);
 }
 
 void MainWindow::closeGraph()
@@ -150,6 +168,7 @@ void MainWindow::closeGraph()
     radiusEdit->setEnabled(false);
 
     setWindowTitle("Graph Algorithms");
+    status->setText("");
 }
 
 void MainWindow::openGraph()
@@ -160,20 +179,13 @@ void MainWindow::openGraph()
     QString filePath = QFileDialog::getOpenFileName(this, "Open Graph", QCoreApplication::applicationDirPath(), "Graph Algorithms File (*.gaf)");
 
     if (!filePath.isNull()) {
-
-        // read graph from file here
-        // dont forget to enable the menu functions
-
         QFileInfo fileInfo(filePath);
         const QString absPath = fileInfo.absoluteFilePath();
 
-        if (!absPath.isNull())
-        {
-            // Open file.
+        if (!absPath.isNull()) {
             std::ifstream file (absPath.toStdString().c_str());
 
-            if (file.is_open())
-            {
+            if (file.is_open()) {
                 std::string content( (std::istreambuf_iterator<char>(file) ),
                                      (std::istreambuf_iterator<char>() ));
 
@@ -199,8 +211,8 @@ void MainWindow::openGraph()
 
                 const rapidjson::Value& nodesArray = d["nodes"];
                 assert(nodesArray.IsArray());
-                for (rapidjson::SizeType i = 0; i < nodesArray.Size(); ++i)
-                {
+
+                for (rapidjson::SizeType i = 0; i < nodesArray.Size(); ++i) {
                     std::printf("   Node %s\n", nodesArray[i]["label"].GetString());
                     std::printf("       X: %d\n", nodesArray[i]["x"].GetInt());
                     std::printf("       Y: %d\n", nodesArray[i]["y"].GetInt());
@@ -211,24 +223,17 @@ void MainWindow::openGraph()
 
                     const rapidjson::Value& adjArray = nodesArray[i]["adjacent"];
                     if (adjArray.IsNull() || !adjArray.IsArray())
-                    {
                         std::cout << "              No adjacent nodes" << std::endl;
-                    }
-                    else
-                    {
+                    else {
                         for (rapidjson::SizeType j = 0; j < adjArray.Size(); ++j)
-                        {
                             std::printf("           Node ID: %d\n", adjArray[j]["nodeID"].GetInt());
-                        }
                     }
                 }
 
                 file.close();
             }
             else
-            {
                 std::cout << "Unable to open file: " << fileInfo.fileName().toStdString() << std::endl;
-            }
         }
 
         ui->graphicsView->setEnabled(true);

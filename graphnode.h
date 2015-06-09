@@ -21,14 +21,19 @@ public:
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     void moveTo(const QPointF& pt);
+
+    QList<GraphEdge*>& getSourceEdges();
+    QList<GraphEdge*>& getDestinationEdges();
     void addSourceEdge(GraphEdge* e);
     void addDestinationEdge(GraphEdge* e);
+    void removeSourceEdge(GraphEdge* e);
+    void removeDestinationEdge(GraphEdge* e);
 
 private:
     QString label;
     qreal cx, cy, r;
-    GraphEdge* sourceEdge;
-    GraphEdge* destinationEdge;
+    QList<GraphEdge*> sourceEdges;
+    QList<GraphEdge*> destinationEdges;
 
 };
 
