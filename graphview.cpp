@@ -13,9 +13,12 @@ GraphView::GraphView(QWidget *parent)
     selectedItem(NULL),
     edgeSource(NULL),
     currentAction(NONE),
+    status(NULL),
     nodeRadius(15),
     weightedGraph(false),
-    undirectedGraph(false)
+    undirectedGraph(false),
+    numberOfNodes(0),
+    numberOfEdges(0)
 {
     setScene(new QGraphicsScene());
     scene()->setSceneRect(rect());
@@ -24,6 +27,14 @@ GraphView::GraphView(QWidget *parent)
 GraphView::~GraphView()
 {
 
+}
+
+void GraphView::clear()
+{
+    scene()->clear();
+    numberOfNodes = 0;
+    numberOfEdges = 0;
+    status->setText("");
 }
 
 void GraphView::setNodeRadius(int radius)
@@ -63,6 +74,31 @@ void GraphView::setGraphUndirected(bool undirected)
 void GraphView::setCurrentAction(GraphAction action)
 {
     currentAction = action;
+}
+
+void GraphView::setStatus(QLabel* _status)
+{
+    status = _status;
+}
+
+void GraphView::updateStatus()
+{
+    QString statusMessage("");
+    if (weightedGraph)
+        statusMessage += "Weighted";
+    else
+        statusMessage += "Unweighted";
+
+    if (undirectedGraph)
+        statusMessage += " undirected";
+    else
+        statusMessage += " directed";
+
+    statusMessage += " graph: " +
+                     QString::number(numberOfNodes) + (numberOfNodes == 1 ? " vertex, " : " vertices, ") +
+                     QString::number(numberOfEdges) + (numberOfEdges == 1 ? " edge" : " edges");
+
+    status->setText(statusMessage);
 }
 
 void GraphView::executeContextMenu(const QPoint& menuPosition)
@@ -138,7 +174,7 @@ void GraphView::addEdge(bool undirected)
 {
     if (edgeSource) {
         GraphNode* edgeDestination = dynamic_cast<GraphNode*>(selectedItem);
-        if (edgeDestination && edgeSource != edgeDestination) {
+        if (edgeDestination && edgeSource != edgeDestination) {            
             GraphEdge* edge = new GraphEdge(edgeSource, edgeDestination, undirected);
             edge->setDrawArrows(!undirectedGraph);
             edge->setDrawWeight(weightedGraph);
@@ -152,6 +188,8 @@ void GraphView::addEdge(bool undirected)
             }
 
             scene()->addItem(edge);
+            ++numberOfEdges;
+            updateStatus();
             edgeSource = NULL;
         }
     }
@@ -172,8 +210,10 @@ void GraphView::mousePressEvent(QMouseEvent *event)
         switch (currentAction) {
             case ADD_VERTEX:
             {
-                GraphNode* node = new GraphNode(pt.x(), pt.y(), qreal(nodeRadius));
+                ++numberOfNodes;
+                GraphNode* node = new GraphNode(numberOfNodes, pt.x(), pt.y(), qreal(nodeRadius));
                 scene()->addItem(node);
+                updateStatus();
             }
             break;
 
@@ -227,6 +267,8 @@ void GraphView::removeItem(GraphNode* node)
         removeItem(it.next());
 
     scene()->removeItem(node);
+    --numberOfNodes;
+    updateStatus();
     delete node;
 }
 
@@ -241,6 +283,8 @@ void GraphView::removeItem(GraphEdge* edge)
     }
 
     scene()->removeItem(edge);
+    --numberOfEdges;
+    updateStatus();
     delete edge;
 }
 

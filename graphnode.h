@@ -10,9 +10,10 @@
 class GraphNode : public QGraphicsEllipseItem
 {
 public:
-    GraphNode(qreal x, qreal y, qreal r);
+    GraphNode(unsigned id, qreal x, qreal y, qreal r);
     virtual ~GraphNode(){}
 
+    unsigned getId();
     QPointF getCenter();
     qreal getRadius();
     QString getLabel();
@@ -30,6 +31,7 @@ public:
     void removeDestinationEdge(GraphEdge* e);
 
 private:
+    unsigned id;
     QString label;
     qreal cx, cy, r;
     QList<GraphEdge*> sourceEdges;

@@ -16,7 +16,7 @@ GraphEdge::GraphEdge(GraphNode* src, GraphNode* dst, bool _undirected)
   weightText(NULL),
   shapePath(NULL),
   undirected(_undirected),
-  weight(0),
+  weight(1),
   bold(false),
   drawArrows(true),
   drawWeight(true)

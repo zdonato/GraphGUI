@@ -1,12 +1,15 @@
 #include "graphnode.h"
 
-GraphNode::GraphNode(qreal x, qreal y, qreal _r)
+GraphNode::GraphNode(unsigned _id, qreal x, qreal y, qreal _r)
 :
   QGraphicsEllipseItem(x - _r, y - _r, _r + _r, _r + _r),
-  label(""), cx(x), cy(y), r(_r)
+  id(_id), label(QString::number(_id)), cx(x), cy(y), r(_r)
 {
-    setFlag(ItemIsMovable);
-    setFlag(ItemSendsGeometryChanges);
+}
+
+unsigned GraphNode::getId()
+{
+    return id;
 }
 
 QPointF GraphNode::getCenter()

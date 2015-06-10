@@ -5,6 +5,7 @@
 #include <QGraphicsItem>
 #include <QGraphicsScene>
 #include <QGraphicsView>
+#include <QLabel>
 #include "graphedge.h"
 #include "graphnode.h"
 
@@ -24,6 +25,9 @@ public:
     explicit GraphView(QWidget *parent = 0);
     virtual ~GraphView();
 
+    void setStatus(QLabel* status);
+    void updateStatus();
+    void clear();
     void setCurrentAction(GraphAction action);
     void setNodeRadius(int radius);
     void setGraphWeighted(bool weighted);
@@ -40,9 +44,12 @@ private:
     QGraphicsItem* selectedItem;
     GraphNode* edgeSource;
     GraphAction currentAction;
+    QLabel* status;
     int nodeRadius;
     bool weightedGraph;
     bool undirectedGraph;
+    unsigned numberOfNodes;
+    unsigned numberOfEdges;
 
 protected slots:
     void mousePressEvent(QMouseEvent *event);

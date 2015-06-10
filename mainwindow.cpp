@@ -31,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     status = new QLabel();
     ui->statusBar->addWidget(status);
+    ui->graphicsView->setStatus(status);
 
     connect(ui->menuBar, SIGNAL(triggered(QAction*)), this, SLOT(menuOptionClicked(QAction*)));
     connect(ui->toolBar, SIGNAL(actionTriggered(QAction*)), this, SLOT(toolBarOptionClicked(QAction*)));
@@ -130,21 +131,8 @@ void MainWindow::newGraph(bool weighted, bool undirected)
     if (!undirected)
         ui->actionAdd_Directed_Edge->setEnabled(true);
 
-    QString statusMessage("");
-    if (weighted)
-        statusMessage += "Weighted";
-    else
-        statusMessage += "Unweighted";
-
-    if (undirected)
-        statusMessage += " undirected";
-    else
-        statusMessage += " directed";
-
-    statusMessage += " graph";
-
     setWindowTitle("Graph Algorithms - New");
-    status->setText(statusMessage);
+    ui->graphicsView->updateStatus();
 }
 
 void MainWindow::closeGraph()
@@ -153,7 +141,7 @@ void MainWindow::closeGraph()
 //        if (userWantsToSave)
 //            saveGraph();
 //        else
-           ui->graphicsView->scene()->clear();
+           ui->graphicsView->clear();
 //    }
 
     ui->graphicsView->setEnabled(false);
@@ -168,7 +156,6 @@ void MainWindow::closeGraph()
     radiusEdit->setEnabled(false);
 
     setWindowTitle("Graph Algorithms");
-    status->setText("");
 }
 
 void MainWindow::openGraph()
