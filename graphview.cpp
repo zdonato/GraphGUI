@@ -35,6 +35,9 @@ void GraphView::clear()
     numberOfNodes = 0;
     numberOfEdges = 0;
     status->setText("");
+    currentAction = NONE;
+    edgeSource = NULL;
+    selectedItem = NULL;
 }
 
 void GraphView::setNodeRadius(int radius)
@@ -74,11 +77,52 @@ void GraphView::setGraphUndirected(bool undirected)
 void GraphView::setCurrentAction(GraphAction action)
 {
     currentAction = action;
+    selectedItem = NULL;
+    edgeSource = NULL;
+    updateStatus();
 }
 
 void GraphView::setStatus(QLabel* _status)
 {
     status = _status;
+}
+
+QString GraphView::actionString(GraphAction a)
+{
+    QString s;
+    switch (a) {
+        case MOVING:
+            s = "Moving";
+        break;
+
+        case ADD_DIRECTED_EDGE:
+            s = "Adding directed edge: ";
+            if (edgeSource)
+                s += "selecting destination from " + edgeSource->getLabel();
+            else
+                s += "selecting source";
+        break;
+
+        case ADD_UNDIRECTED_EDGE:
+            s = "Adding undirected edge: ";
+            if (a == ADD_UNDIRECTED_EDGE) {
+                if (edgeSource)
+                    s += "selecting second vertex";
+                else
+                    s += "selecting first vertex";
+            }
+        break;
+
+        case ADD_VERTEX:
+            s = "Adding vertex";
+        break;
+
+        case NONE:
+            s = "No action";
+        break;
+    }
+
+    return s;
 }
 
 void GraphView::updateStatus()
@@ -97,6 +141,9 @@ void GraphView::updateStatus()
     statusMessage += " graph: " +
                      QString::number(numberOfNodes) + (numberOfNodes == 1 ? " vertex, " : " vertices, ") +
                      QString::number(numberOfEdges) + (numberOfEdges == 1 ? " edge" : " edges");
+
+    if (currentAction != NONE)
+        statusMessage += " - " + actionString(currentAction);
 
     status->setText(statusMessage);
 }
@@ -174,27 +221,69 @@ void GraphView::addEdge(bool undirected)
 {
     if (edgeSource) {
         GraphNode* edgeDestination = dynamic_cast<GraphNode*>(selectedItem);
-        if (edgeDestination && edgeSource != edgeDestination) {            
-            GraphEdge* edge = new GraphEdge(edgeSource, edgeDestination, undirected);
-            edge->setDrawArrows(!undirectedGraph);
-            edge->setDrawWeight(weightedGraph);
+        if (edgeDestination && edgeSource != edgeDestination) {
+            GraphEdge* existingEdge = NULL;
+            bool drawAsArc(false);
 
-            edgeSource->addSourceEdge(edge);
-            edgeDestination->addDestinationEdge(edge);
-
-            if (undirected) {
-                edgeSource->addDestinationEdge(edge);
-                edgeDestination->addSourceEdge(edge);
+            QListIterator<GraphEdge*> it(edgeSource->getDestinationEdges());
+            while (it.hasNext() && !existingEdge) {
+                GraphEdge* edge = it.next();
+                if (edge->getSourceNode() == edgeDestination)
+                    existingEdge = edge;
             }
 
-            scene()->addItem(edge);
-            ++numberOfEdges;
-            updateStatus();
+            if (existingEdge) {
+                if (!existingEdge->isUndirected()) {
+                    if (weightedGraph && !undirectedGraph && currentAction == ADD_DIRECTED_EDGE) {
+                        existingEdge->setDrawAsArc(true);
+                        drawAsArc = true;
+                        existingEdge = NULL;
+                    }
+                    else {
+                        existingEdge->setUndirected(true);
+                        edgeSource->addSourceEdge(existingEdge);
+                        edgeDestination->addDestinationEdge(existingEdge);
+                    }
+                }
+            }
+            else {
+                it = QListIterator<GraphEdge*>(edgeSource->getSourceEdges());
+                while (it.hasNext() && !existingEdge) {
+                    GraphEdge* edge = it.next();
+                    if (edge->getDestinationNode() == edgeDestination) {
+                       existingEdge = edge;
+                       if (currentAction == ADD_UNDIRECTED_EDGE) {
+                           existingEdge->setUndirected(true);
+                           edgeSource->addDestinationEdge(existingEdge);
+                           edgeDestination->addSourceEdge(existingEdge);
+                       }
+                    }
+                }
+            }
+
+            if (!existingEdge) {
+                GraphEdge* edge = new GraphEdge(edgeSource, edgeDestination, undirected, !undirectedGraph, weightedGraph, drawAsArc);
+                edgeSource->addSourceEdge(edge);
+                edgeDestination->addDestinationEdge(edge);
+
+                if (undirected) {
+                    edgeSource->addDestinationEdge(edge);
+                    edgeDestination->addSourceEdge(edge);
+                }
+
+                scene()->addItem(edge);
+                ++numberOfEdges;
+                updateStatus();
+            }
+
             edgeSource = NULL;
+            scene()->update();
         }
     }
     else
         edgeSource = dynamic_cast<GraphNode*>(selectedItem);
+
+    updateStatus();
 }
 
 void GraphView::mousePressEvent(QMouseEvent *event)

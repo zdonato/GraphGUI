@@ -11,7 +11,7 @@ class GraphNode;
 class GraphEdge : public QGraphicsItem
 {
 public:
-    GraphEdge(GraphNode* source, GraphNode* destination, bool undirected);
+    GraphEdge(GraphNode* source, GraphNode* destination, bool undirected, bool drawArrows, bool drawWeight, bool drawAsArc);
     virtual ~GraphEdge();
 
     void updateDrawing();
@@ -25,6 +25,7 @@ public:
     void setBold(bool bold);
     void setDrawArrows(bool draw);
     void setDrawWeight(bool draw);
+    void setDrawAsArc(bool drawAsArc);
 
     GraphNode* getSourceNode();
     GraphNode* getDestinationNode();
@@ -37,21 +38,21 @@ public:
     void destinationUpdated();
     void changeDirection();
 
-private:    
+private:
+    void createArcDrawing();
+    void createStraightLineDrawing();
+    void cleanDrawing();
+
     GraphNode* source;
-    GraphNode* destination;
-    QGraphicsLineItem* mainLine;
-    QGraphicsLineItem* destinationArrowLine1;
-    QGraphicsLineItem* destinationArrowLine2;
-    QGraphicsLineItem* sourceArrowLine1;
-    QGraphicsLineItem* sourceArrowLine2;
-    QGraphicsTextItem* weightText;
+    GraphNode* destination;  
     QPainterPath* shapePath;
+    QGraphicsTextItem* weightText;
     bool undirected;
-    int weight;
-    bool bold;
     bool drawArrows;
     bool drawWeight;
+    bool drawAsArc;
+    int weight;
+    bool bold;    
 };
 
 #endif // GRAPHEDGE_H

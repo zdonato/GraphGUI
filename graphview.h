@@ -40,6 +40,7 @@ private:
     void changeLabel(GraphNode* node);
     void changeWeight(GraphEdge* edge);
     void addEdge(bool undirected);
+    QString actionString(GraphAction action);
 
     QGraphicsItem* selectedItem;
     GraphNode* edgeSource;

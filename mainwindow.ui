@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>347</height>
+    <width>690</width>
+    <height>457</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
@@ -22,8 +28,8 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>401</width>
-      <height>280</height>
+      <width>691</width>
+      <height>391</height>
      </rect>
     </property>
     <property name="resizeAnchor">
@@ -36,7 +42,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>400</width>
+     <width>690</width>
      <height>21</height>
     </rect>
    </property>
@@ -46,18 +52,18 @@
     </property>
     <widget class="QMenu" name="menuNew">
      <property name="title">
-      <string>New</string>
+      <string>&amp;New</string>
      </property>
      <widget class="QMenu" name="menuUnweighted_Graph">
       <property name="title">
-       <string>Unweighted Graph</string>
+       <string>&amp;Unweighted Graph</string>
       </property>
       <addaction name="actionNew_Unweighted_Directed_Graph"/>
       <addaction name="actionNew_Unweighted_Undirected_Graph"/>
      </widget>
      <widget class="QMenu" name="menuWeighted_Graph">
       <property name="title">
-       <string>Weighted Graph</string>
+       <string>&amp;Weighted Graph</string>
       </property>
       <addaction name="actionNew_Weighted_Directed_Graph"/>
       <addaction name="actionNew_Weighted_Undirected_Graph"/>
@@ -70,7 +76,7 @@
       <bool>false</bool>
      </property>
      <property name="title">
-      <string>Export</string>
+      <string>&amp;Export</string>
      </property>
      <addaction name="actionPNG"/>
     </widget>
@@ -134,7 +140,7 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
    <property name="text">
-    <string>Open</string>
+    <string>&amp;Open...</string>
    </property>
   </action>
   <action name="actionClose">
@@ -142,12 +148,12 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Close</string>
+    <string>&amp;Close</string>
    </property>
   </action>
   <action name="actionQuit">
    <property name="text">
-    <string>Exit</string>
+    <string>E&amp;xit</string>
    </property>
   </action>
   <action name="actionSave">
@@ -155,7 +161,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Save</string>
+    <string>&amp;Save</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
@@ -166,7 +172,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Save As...</string>
+    <string>Save &amp;As...</string>
    </property>
   </action>
   <action name="actionAdd_vertex">
@@ -189,7 +195,7 @@
   </action>
   <action name="actionPNG">
    <property name="text">
-    <string>PNG</string>
+    <string>&amp;PNG</string>
    </property>
   </action>
   <action name="actionAdd_Vertex">
@@ -243,22 +249,22 @@
   </action>
   <action name="actionNew_Unweighted_Directed_Graph">
    <property name="text">
-    <string>Directed</string>
+    <string>&amp;Directed</string>
    </property>
   </action>
   <action name="actionNew_Unweighted_Undirected_Graph">
    <property name="text">
-    <string>Undirected</string>
+    <string>&amp;Undirected</string>
    </property>
   </action>
   <action name="actionNew_Weighted_Directed_Graph">
    <property name="text">
-    <string>Directed</string>
+    <string>&amp;Directed</string>
    </property>
   </action>
   <action name="actionNew_Weighted_Undirected_Graph">
    <property name="text">
-    <string>Undirected</string>
+    <string>&amp;Undirected</string>
    </property>
   </action>
  </widget>
