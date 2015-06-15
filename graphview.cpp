@@ -18,7 +18,8 @@ GraphView::GraphView(QWidget *parent)
     weightedGraph(false),
     undirectedGraph(false),
     numberOfNodes(0),
-    numberOfEdges(0)
+    numberOfEdges(0),
+    nextNodeID(1)
 {
     setScene(new QGraphicsScene());
     scene()->setSceneRect(rect());
@@ -34,6 +35,7 @@ void GraphView::clear()
     scene()->clear();
     numberOfNodes = 0;
     numberOfEdges = 0;
+    nextNodeID = 1;
     status->setText("");
     currentAction = NONE;
     edgeSource = NULL;
@@ -300,7 +302,7 @@ void GraphView::mousePressEvent(QMouseEvent *event)
             case ADD_VERTEX:
             {
                 ++numberOfNodes;
-                GraphNode* node = new GraphNode(numberOfNodes, pt.x(), pt.y(), qreal(nodeRadius));
+                GraphNode* node = new GraphNode(nextNodeID++, pt.x(), pt.y(), qreal(nodeRadius));
                 scene()->addItem(node);
                 updateStatus();
             }

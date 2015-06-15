@@ -51,6 +51,7 @@ private:
     bool undirectedGraph;
     unsigned numberOfNodes;
     unsigned numberOfEdges;
+    unsigned nextNodeID;
 
 protected slots:
     void mousePressEvent(QMouseEvent *event);
