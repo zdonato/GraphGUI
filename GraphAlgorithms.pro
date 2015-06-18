@@ -16,12 +16,14 @@ SOURCES += main.cpp \
         mainwindow.cpp \
     graphview.cpp \
     graphnode.cpp \
-    graphedge.cpp
+    graphedge.cpp \
+    parser.cpp
 
 HEADERS  += mainwindow.h \
     graphview.h \
     graphnode.h \
-    graphedge.h
+    graphedge.h \
+    parser.h
 
 FORMS    += mainwindow.ui
 
