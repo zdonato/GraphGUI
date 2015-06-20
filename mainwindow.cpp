@@ -9,6 +9,7 @@
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
+#include "parser.h"
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -161,80 +162,47 @@ void MainWindow::closeGraph()
 void MainWindow::openGraph()
 {
 //    if (fileOpen)
-//        closeGraph();
+        closeGraph();
 
     QString filePath = QFileDialog::getOpenFileName(this, "Open Graph", QCoreApplication::applicationDirPath(), "Graph Algorithms File (*.gaf)");
+    QFileInfo fileInfo(filePath);
 
-    if (!filePath.isNull()) {
-        QFileInfo fileInfo(filePath);
-        const QString absPath = fileInfo.absoluteFilePath();
+    Parser parser;
+    parser.parseGraph(filePath);
 
-        if (!absPath.isNull()) {
-            std::ifstream file (absPath.toStdString().c_str());
+    QListIterator<GraphNode*> it(parser.getNodes());
+    while (it.hasNext()) {
+        GraphNode* node = it.next();
 
-            if (file.is_open()) {
-                std::string content( (std::istreambuf_iterator<char>(file) ),
-                                     (std::istreambuf_iterator<char>() ));
+        ui->graphicsView->scene()->addItem(node);
 
-                rapidjson::Document d;
-                d.Parse(content.c_str());
-                rapidjson::Value& val = d["edgeType"];
+        QListIterator<GraphEdge*> edgesIt(node->getSourceEdges());
+        while (edgesIt.hasNext()) {
+            GraphEdge* edge = edgesIt.next();
 
-                //Stringify the json.
-//                rapidjson::StringBuffer buffer;
-//                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-//                d.Accept(writer);
-
-                // Test out each key value pair.
-                std::cout << "This graph is: " << val.GetString() << std::endl;
-
-                val = d["graphWeight"];
-                std::cout << "This graph is: " << val.GetString() << std::endl;
-
-                val = d["radius"];
-                std::cout << "The nodes have radius: " << val.GetInt() << std::endl;
-
-                std::cout << "The nodes of the graph are: " << std::endl;
-
-                const rapidjson::Value& nodesArray = d["nodes"];
-                assert(nodesArray.IsArray());
-
-                for (rapidjson::SizeType i = 0; i < nodesArray.Size(); ++i) {
-                    std::printf("   Node %s\n", nodesArray[i]["label"].GetString());
-                    std::printf("       X: %d\n", nodesArray[i]["x"].GetInt());
-                    std::printf("       Y: %d\n", nodesArray[i]["y"].GetInt());
-                    std::printf("       ID: %d\n", nodesArray[i]["id"].GetInt());
-
-                    // Iterate over the adjacent nodes.
-                    std::cout <<"       Adjacent nodes: " << std::endl;
-
-                    const rapidjson::Value& adjArray = nodesArray[i]["adjacent"];
-                    if (adjArray.IsNull() || !adjArray.IsArray())
-                        std::cout << "              No adjacent nodes" << std::endl;
-                    else {
-                        for (rapidjson::SizeType j = 0; j < adjArray.Size(); ++j)
-                            std::printf("           Node ID: %d\n", adjArray[j]["nodeID"].GetInt());
-                    }
-                }
-
-                file.close();
-            }
-            else
-                std::cout << "Unable to open file: " << fileInfo.fileName().toStdString() << std::endl;
+            ui->graphicsView->scene()->addItem(edge);
         }
 
-        ui->graphicsView->setEnabled(true);
-        ui->actionSave->setEnabled(true);
-        ui->actionSave_as->setEnabled(true);
-        ui->actionPNG->setEnabled(true);
-        ui->actionClose->setEnabled(true);
-        ui->actionMove->setEnabled(true);
-        ui->actionAdd_Vertex->setEnabled(true);
-        ui->actionAdd_Undirected_Edge->setEnabled(true);
-        radiusEdit->setEnabled(true);
+        edgesIt = QListIterator<GraphEdge*>(node->getSourceEdges());
+        while (edgesIt.hasNext()) {
+            GraphEdge* edge = edgesIt.next();
 
-        setWindowTitle("Graph Algorithms - " + fileInfo.baseName());
+            if (!edge->isUndirected())
+                ui->graphicsView->scene()->addItem(edge);
+        }
     }
+
+    ui->graphicsView->setEnabled(true);
+    ui->actionSave->setEnabled(true);
+    ui->actionSave_as->setEnabled(true);
+    ui->actionPNG->setEnabled(true);
+    ui->actionClose->setEnabled(true);
+    ui->actionMove->setEnabled(true);
+    ui->actionAdd_Vertex->setEnabled(true);
+    ui->actionAdd_Undirected_Edge->setEnabled(true);
+    radiusEdit->setEnabled(true);
+
+    setWindowTitle("Graph Algorithms - " + fileInfo.baseName());
 }
 
 void MainWindow::saveGraph()
