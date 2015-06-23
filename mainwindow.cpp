@@ -213,6 +213,13 @@ void MainWindow::saveGraph()
 //        saveGraphAs();
 
     Parser parser;
+
+    parser.setNodes(ui->graphicsView->getNodes());
+    parser.setGraphWeight(ui->graphicsView->isWeighted());
+    parser.setEdgeType(ui->graphicsView->isUndirected());
+    parser.setRadius(ui->graphicsView->getRadius());
+
+    parser.saveGraph("example2.gaf");
 }
 
 void MainWindow::saveGraphAs()

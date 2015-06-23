@@ -15,6 +15,31 @@ QList<GraphNode*>& Parser::getNodes()
     return nodes;
 }
 
+void Parser::setNodes(QList<GraphNode *> nodes){
+    this->nodes = nodes;
+}
+
+void Parser::setEdgeType(bool undirected){
+
+    if (undirected){
+        this->edgeType = "undirected";
+    }
+    else {
+        this->edgeType = "directed";
+    }
+
+}
+
+void Parser::setGraphWeight(bool weighted){
+
+    if (weighted){
+        this->graphWeight = "weighted";
+    }
+    else {
+        this->graphWeight = "unweighted";
+    }
+}
+
 void Parser::parseGraph(QString filePath)
 {
     if (!filePath.isNull()) {
@@ -81,7 +106,7 @@ void Parser::parseGraph(QString filePath)
 }
 
 
-Parser::saveGraph(QString filePath){
+void Parser::saveGraph(QString filePath){
 
     // Save graph to this file name. Overwrite the contents of the file.
     rapidjson::StringBuffer s;
@@ -90,10 +115,10 @@ Parser::saveGraph(QString filePath){
     writer.StartObject();
 
     writer.String("edgeType");
-    writer.String(this->edgeType);
+    writer.String(this->edgeType.toStdString().c_str());
 
     writer.String("graphWeight");
-    writer.String(this->graphWeight);
+    writer.String(this->graphWeight.toStdString().c_str());
 
     writer.String("radius");
     writer.Int(this->nodeRadius);
@@ -102,7 +127,7 @@ Parser::saveGraph(QString filePath){
     writer.String("nodes");
     writer.StartArray();
 
-    QListIterator<GraphNode*> it(parser.getNodes());
+    QListIterator<GraphNode*> it(this->getNodes());
 
     while(it.hasNext()){
         GraphNode* node = it.next();
@@ -110,16 +135,16 @@ Parser::saveGraph(QString filePath){
         writer.StartObject();
 
         writer.String("label");
-        writer.String(node->label);
+        writer.String(node->getLabel().toStdString().c_str());
 
         writer.String("x");
-        writer.Int(node->x);
+        writer.Int(node->x());
 
         writer.String("y");
-        writer.Int(node->y);
+        writer.Int(node->y());
 
         writer.String("id");
-        writer.Int(node->id);
+        writer.Int(node->getId());
 
 //           Find out how to get adjacent.
 //            writer.String("adjacent");
@@ -133,7 +158,9 @@ Parser::saveGraph(QString filePath){
     writer.EndObject();
 
     if (!filePath.isNull()){
-        std::ofstream out_file(filePath);
+        std::ofstream out_file;
+
+        out_file.open(filePath.toStdString().c_str());
 
         out_file << s.GetString();
         out_file.close();

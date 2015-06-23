@@ -89,6 +89,18 @@ void GraphView::setStatus(QLabel* _status)
     status = _status;
 }
 
+int GraphView::getRadius(){
+    return this->nodeRadius;
+}
+
+bool GraphView::isWeighted(){
+    return this->weightedGraph;
+}
+
+bool GraphView::isUndirected(){
+    return this->undirectedGraph;
+}
+
 QString GraphView::actionString(GraphAction a)
 {
     QString s;
@@ -395,4 +407,16 @@ void GraphView::changeWeight(GraphEdge* edge)
         edge->setWeight(newWeight);
         edge->update();
     }
+}
+
+QList<GraphNode*> GraphView::getNodes(){
+    QListIterator<QGraphicsItem*> it(scene()->items());
+    QList<GraphNode*> nodes;
+    while (it.hasNext()) {
+        GraphNode* node = dynamic_cast<GraphNode*>(it.next());
+
+        nodes.append(node);
+    }
+
+    return nodes;
 }

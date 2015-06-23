@@ -12,9 +12,9 @@ public:
     void parseGraph(QString filePath);
     void saveGraph(QString existingPath = NULL);
     void setNodes(QList<GraphNode*> nodes);
-    void setEdgeType(QString type);
+    void setEdgeType(bool undirected);
     void setRadius(int r);
-    void setGraphWeight(QString weight);
+    void setGraphWeight(bool weighted);
 
     QList<GraphNode*>& getNodes();
 

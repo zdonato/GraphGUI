@@ -32,6 +32,10 @@ public:
     void setNodeRadius(int radius);
     void setGraphWeighted(bool weighted);
     void setGraphUndirected(bool undirected);
+    QList<GraphNode*> getNodes();
+    int getRadius();
+    bool isWeighted();
+    bool isUndirected();
 
 private:
     void executeContextMenu(const QPoint& menuPosition);
