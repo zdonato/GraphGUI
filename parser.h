@@ -11,6 +11,10 @@ public:
 
     void parseGraph(QString filePath);
     void saveGraph(QString existingPath = NULL);
+    void setNodes(QList<GraphNode*> nodes);
+    void setEdgeType(QString type);
+    void setRadius(int r);
+    void setGraphWeight(QString weight);
 
     QList<GraphNode*>& getNodes();
 
@@ -21,6 +25,7 @@ private:
     QString graphWeight;
     int nodeRadius;
     QList<GraphNode*> nodes;
+    int numberNodes;
 };
 
 #endif // PARSER_H

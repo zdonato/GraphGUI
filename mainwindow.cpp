@@ -211,6 +211,8 @@ void MainWindow::saveGraph()
 //        save graph to file here
 //    else
 //        saveGraphAs();
+
+    Parser parser;
 }
 
 void MainWindow::saveGraphAs()

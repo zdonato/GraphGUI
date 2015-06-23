@@ -80,6 +80,71 @@ void Parser::parseGraph(QString filePath)
         std::cout << "Unable to open file" << std::endl;
 }
 
+
+Parser::saveGraph(QString filePath){
+
+    // Save graph to this file name. Overwrite the contents of the file.
+    rapidjson::StringBuffer s;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+
+    writer.StartObject();
+
+    writer.String("edgeType");
+    writer.String(this->edgeType);
+
+    writer.String("graphWeight");
+    writer.String(this->graphWeight);
+
+    writer.String("radius");
+    writer.Int(this->nodeRadius);
+
+    // Write out the nodes.
+    writer.String("nodes");
+    writer.StartArray();
+
+    QListIterator<GraphNode*> it(parser.getNodes());
+
+    while(it.hasNext()){
+        GraphNode* node = it.next();
+
+        writer.StartObject();
+
+        writer.String("label");
+        writer.String(node->label);
+
+        writer.String("x");
+        writer.Int(node->x);
+
+        writer.String("y");
+        writer.Int(node->y);
+
+        writer.String("id");
+        writer.Int(node->id);
+
+//           Find out how to get adjacent.
+//            writer.String("adjacent");
+//            writer.StartArray();
+
+        writer.EndObject();
+    }
+
+    writer.EndArray();
+
+    writer.EndObject();
+
+    if (!filePath.isNull()){
+        std::ofstream out_file(filePath);
+
+        out_file << s.GetString();
+        out_file.close();
+    }
+    else {
+        // Figure out what to do if no path given?
+    }
+}
+
+
+
 // Finds and returns the node with the given id. Returns null if not found.
 GraphNode* Parser::findNode(unsigned id)
 {
