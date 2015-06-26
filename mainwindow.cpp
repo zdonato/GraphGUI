@@ -34,6 +34,15 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->statusBar->addWidget(status);
     ui->graphicsView->setStatus(status);
 
+    undoStack = new QUndoStack();
+    ui->graphicsView->setUndoStack(undoStack);
+    undoAction = undoStack->createUndoAction(this, "&Undo");
+    undoAction->setShortcuts(QKeySequence::Undo);
+    ui->menuEdit->addAction(undoAction);
+    redoAction = undoStack->createRedoAction(this, "&Redo");
+    redoAction->setShortcuts(QKeySequence::Redo);
+    ui->menuEdit->addAction(redoAction);
+
     connect(ui->menuBar, SIGNAL(triggered(QAction*)), this, SLOT(menuOptionClicked(QAction*)));
     connect(ui->toolBar, SIGNAL(actionTriggered(QAction*)), this, SLOT(toolBarOptionClicked(QAction*)));
     connect(radiusEdit, SIGNAL(valueChanged(int)), this, SLOT(radiusChanged(int)));
@@ -213,11 +222,10 @@ void MainWindow::saveGraph()
 //        saveGraphAs();
 
     Parser parser;
-
     parser.setNodes(ui->graphicsView->getNodes());
-    parser.setGraphWeight(ui->graphicsView->isWeighted());
-    parser.setEdgeType(ui->graphicsView->isUndirected());
-    parser.setRadius(ui->graphicsView->getRadius());
+    parser.setGraphWeight(ui->graphicsView->isGraphWeighted());
+    parser.setEdgeType(ui->graphicsView->isGraphUndirected());
+    parser.setNodeRadius(ui->graphicsView->getNodeRadius());
 
     parser.saveGraph("example2.gaf");
 }

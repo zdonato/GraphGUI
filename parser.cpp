@@ -8,36 +8,61 @@
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
 
-Parser::Parser() { }
+Parser::Parser()
+{
+
+}
+
+Parser::~Parser()
+{
+
+}
 
 QList<GraphNode*>& Parser::getNodes()
 {
     return nodes;
 }
 
-void Parser::setNodes(QList<GraphNode *> nodes){
+void Parser::setNodes(QList<GraphNode*> nodes)
+{
     this->nodes = nodes;
 }
 
-void Parser::setEdgeType(bool undirected){
-
-    if (undirected){
-        this->edgeType = "undirected";
-    }
-    else {
-        this->edgeType = "directed";
-    }
-
+void Parser::setEdgeType(bool undirected)
+{
+    if (undirected)
+        edgeType = "undirected";
+    else
+        edgeType = "directed";
 }
 
-void Parser::setGraphWeight(bool weighted){
+void Parser::setGraphWeight(bool weighted)
+{
+    if (weighted)
+        graphWeight = "weighted";
+    else
+        graphWeight = "unweighted";
+}
 
-    if (weighted){
-        this->graphWeight = "weighted";
+void Parser::setNodeRadius(int r)
+{
+    nodeRadius = r;
+}
+
+// Finds and returns the node with the given id. Returns null if not found.
+GraphNode* Parser::findNode(unsigned id)
+{
+    GraphNode* result = NULL;
+
+    QListIterator<GraphNode*> it(nodes);
+    while (it.hasNext() && !result) {
+        GraphNode* node = it.next();
+
+        if (node->getId() == id)
+            result = node;
     }
-    else {
-        this->graphWeight = "unweighted";
-    }
+
+    return result;
 }
 
 void Parser::parseGraph(QString filePath)
@@ -105,9 +130,8 @@ void Parser::parseGraph(QString filePath)
         std::cout << "Unable to open file" << std::endl;
 }
 
-
-void Parser::saveGraph(QString filePath){
-
+void Parser::saveGraph(QString filePath)
+{
     // Save graph to this file name. Overwrite the contents of the file.
     rapidjson::StringBuffer s;
     rapidjson::Writer<rapidjson::StringBuffer> writer(s);
@@ -115,21 +139,21 @@ void Parser::saveGraph(QString filePath){
     writer.StartObject();
 
     writer.String("edgeType");
-    writer.String(this->edgeType.toStdString().c_str());
+    writer.String(edgeType.toStdString().c_str());
 
     writer.String("graphWeight");
-    writer.String(this->graphWeight.toStdString().c_str());
+    writer.String(graphWeight.toStdString().c_str());
 
     writer.String("radius");
-    writer.Int(this->nodeRadius);
+    writer.Int(nodeRadius);
 
     // Write out the nodes.
     writer.String("nodes");
     writer.StartArray();
 
-    QListIterator<GraphNode*> it(this->getNodes());
+    QListIterator<GraphNode*> it(getNodes());
 
-    while(it.hasNext()){
+    while(it.hasNext()) {
         GraphNode* node = it.next();
 
         writer.StartObject();
@@ -146,10 +170,6 @@ void Parser::saveGraph(QString filePath){
         writer.String("id");
         writer.Int(node->getId());
 
-//           Find out how to get adjacent.
-//            writer.String("adjacent");
-//            writer.StartArray();
-
         writer.EndObject();
     }
 
@@ -157,9 +177,8 @@ void Parser::saveGraph(QString filePath){
 
     writer.EndObject();
 
-    if (!filePath.isNull()){
+    if (!filePath.isNull()) {
         std::ofstream out_file;
-
         out_file.open(filePath.toStdString().c_str());
 
         out_file << s.GetString();
@@ -169,25 +188,3 @@ void Parser::saveGraph(QString filePath){
         // Figure out what to do if no path given?
     }
 }
-
-
-
-// Finds and returns the node with the given id. Returns null if not found.
-GraphNode* Parser::findNode(unsigned id)
-{
-    GraphNode* result = NULL;
-
-    QListIterator<GraphNode*> it(nodes);
-    while (it.hasNext() && !result) {
-        GraphNode* node = it.next();
-
-        if (node->getId() == id)
-            result = node;
-    }
-
-    return result;
-}
-
-
-
-

@@ -90,25 +90,13 @@
     <addaction name="actionClose"/>
     <addaction name="actionQuit"/>
    </widget>
-   <widget class="QMenu" name="menuGraph">
+   <widget class="QMenu" name="menuEdit">
     <property name="title">
-     <string>Graph</string>
+     <string>&amp;Edit</string>
     </property>
-    <widget class="QMenu" name="menuAdd_Edge">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="title">
-      <string>Add Edge</string>
-     </property>
-     <addaction name="actionDirected"/>
-     <addaction name="actionUndirected"/>
-    </widget>
-    <addaction name="actionAdd_vertex"/>
-    <addaction name="menuAdd_Edge"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuGraph"/>
+   <addaction name="menuEdit"/>
   </widget>
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">

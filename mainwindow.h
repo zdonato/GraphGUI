@@ -5,24 +5,28 @@
 #include <QMainWindow>
 #include <QPushButton>
 #include <QSpinBox>
+#include <QUndoStack>
 #include "graphview.h"
 
 namespace Ui {
-class MainWindow;
+  class MainWindow;
 }
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-public:
+  public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-private:
+  private:
     Ui::MainWindow *ui;
     QSpinBox* radiusEdit;
     QLabel* status;
+    QUndoStack* undoStack;
+    QAction* undoAction;
+    QAction* redoAction;
 
     void newGraph(bool weighted, bool undirected);
     void closeGraph();
@@ -30,7 +34,7 @@ private:
     void saveGraph();
     void saveGraphAs();
 
-protected slots:
+  protected slots:
     void menuOptionClicked(QAction* action);
     void toolBarOptionClicked(QAction* action);
     void radiusChanged(int r);

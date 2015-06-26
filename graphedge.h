@@ -10,8 +10,10 @@ class GraphNode;
 
 class GraphEdge : public QGraphicsItem
 {
-public:
+  public:
     GraphEdge(GraphNode* source, GraphNode* destination, bool undirected, bool drawArrows, bool drawWeight, bool drawAsArc);
+    GraphEdge(const GraphEdge& other);
+    GraphEdge& operator=(const GraphEdge& other);
     virtual ~GraphEdge();
 
     void updateDrawing();
@@ -38,13 +40,13 @@ public:
     void destinationUpdated();
     void changeDirection();
 
-private:
+  private:
     void createArcDrawing();
     void createStraightLineDrawing();
     void cleanDrawing();
 
     GraphNode* source;
-    GraphNode* destination;  
+    GraphNode* destination;
     QPainterPath* shapePath;
     QGraphicsTextItem* weightText;
     bool undirected;

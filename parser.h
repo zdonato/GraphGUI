@@ -6,26 +6,28 @@
 
 class Parser
 {
-public:
+  public:
     Parser();
+    virtual ~Parser();
 
     void parseGraph(QString filePath);
     void saveGraph(QString existingPath = NULL);
-    void setNodes(QList<GraphNode*> nodes);
-    void setEdgeType(bool undirected);
-    void setRadius(int r);
-    void setGraphWeight(bool weighted);
 
     QList<GraphNode*>& getNodes();
+    void setNodes(QList<GraphNode*> nodes);
 
-private:
+    void setEdgeType(bool type);
+    void setNodeRadius(int r);
+    void setGraphWeight(bool weight);
+
+  private:
     GraphNode* findNode(unsigned id);
 
     QString edgeType;
     QString graphWeight;
     int nodeRadius;
     QList<GraphNode*> nodes;
-    int numberNodes;
+    int numberOfNodes;
 };
 
 #endif // PARSER_H

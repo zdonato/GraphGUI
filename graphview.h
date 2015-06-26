@@ -6,6 +6,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QLabel>
+#include <QUndoStack>
 #include "graphedge.h"
 #include "graphnode.h"
 
@@ -21,7 +22,7 @@ class GraphView : public QGraphicsView
 {
     Q_OBJECT
 
-public:
+  public:
     explicit GraphView(QWidget *parent = 0);
     virtual ~GraphView();
 
@@ -29,27 +30,37 @@ public:
     void updateStatus();
     void clear();
     void setCurrentAction(GraphAction action);
-    void setNodeRadius(int radius);
-    void setGraphWeighted(bool weighted);
-    void setGraphUndirected(bool undirected);
-    QList<GraphNode*> getNodes();
-    int getRadius();
-    bool isWeighted();
-    bool isUndirected();
 
-private:
+    int getNodeRadius();
+    void setNodeRadius(int radius);
+
+    bool isGraphWeighted();
+    void setGraphWeighted(bool weighted);
+
+    bool isGraphUndirected();
+    void setGraphUndirected(bool undirected);
+
+    void setUndoStack(QUndoStack* stack);
+    void addNode(GraphNode* node);
+    void addEdge(GraphEdge* edge);
+    void removeNode(GraphNode* node);
+    void removeEdge(GraphEdge* edge);
+    QList<GraphNode*> getNodes();
+
+  private:
     void executeContextMenu(const QPoint& menuPosition);
-    void removeItem(GraphNode* node);
-    void removeItem(GraphEdge* edge);
+    void removeItemCommand(GraphNode* node);
+    void removeItemCommand(GraphEdge* edge);
     void changeLabel(GraphNode* node);
     void changeWeight(GraphEdge* edge);
-    void addEdge(bool undirected);
+    void addEdgeCommand(bool undirected);
     QString actionString(GraphAction action);
 
     QGraphicsItem* selectedItem;
     GraphNode* edgeSource;
     GraphAction currentAction;
     QLabel* status;
+    QUndoStack* undoStack;
     int nodeRadius;
     bool weightedGraph;
     bool undirectedGraph;
@@ -57,7 +68,7 @@ private:
     unsigned numberOfEdges;
     unsigned nextNodeID;
 
-protected slots:
+  protected slots:
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);

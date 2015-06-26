@@ -14,16 +14,30 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
         mainwindow.cpp \
-    graphview.cpp \
-    graphnode.cpp \
-    graphedge.cpp \
-    parser.cpp
+        graphview.cpp \
+        graphnode.cpp \
+        graphedge.cpp \
+        parser.cpp \
+        movenodecommand.cpp \
+    addnodecommand.cpp \
+    removenodecommand.cpp \
+    removeedgecommand.cpp \
+    addedgecommand.cpp \
+    changeedgedirectioncommand.cpp \
+    changeedgeweightcommand.cpp
 
 HEADERS  += mainwindow.h \
-    graphview.h \
-    graphnode.h \
-    graphedge.h \
-    parser.h
+            graphview.h \
+            graphnode.h \
+            graphedge.h \
+            parser.h \
+            movenodecommand.h \
+    addnodecommand.h \
+    removenodecommand.h \
+    removeedgecommand.h \
+    addedgecommand.h \
+    changeedgedirectioncommand.h \
+    changeedgeweightcommand.h
 
 FORMS    += mainwindow.ui
 

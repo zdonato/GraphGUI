@@ -20,6 +20,50 @@ GraphEdge::GraphEdge(GraphNode* src, GraphNode* dst, bool _undirected, bool _dra
     updateDrawing();
 }
 
+GraphEdge::GraphEdge(const GraphEdge& other)
+  :
+    QGraphicsItem(),
+    source(other.source),
+    destination(other.destination),
+    weightText(NULL),
+    undirected(other.undirected),
+    drawArrows(other.drawArrows),
+    drawWeight(other.drawWeight),
+    drawAsArc(other.drawAsArc),
+    weight(other.weight),
+    bold(other.bold)
+{
+    shapePath = new QPainterPath(*other.shapePath);
+    if (other.weightText) {
+        weightText = new QGraphicsTextItem(QString::number(weight));
+        weightText->setPos(other.weightText->pos());
+    }
+}
+
+GraphEdge& GraphEdge::operator=(const GraphEdge& other)
+{
+    delete weightText;
+    if (other.weightText) {
+        weightText = new QGraphicsTextItem(QString::number(weight));
+        weightText->setPos(other.weightText->pos());
+    }
+    else
+        weightText = NULL;
+    delete shapePath;
+    shapePath = new QPainterPath(*other.shapePath);
+
+    source = other.source;
+    destination = other.destination;
+    undirected = other.undirected;
+    drawArrows = other.drawArrows;
+    drawWeight = other.drawWeight;
+    drawAsArc = other.drawAsArc;
+    weight = other.weight;
+    bold = other.bold;
+
+    return *this;
+}
+
 GraphEdge::~GraphEdge()
 {
     cleanDrawing();
@@ -193,8 +237,18 @@ bool GraphEdge::isUndirected()
 
 void GraphEdge::setUndirected(bool _undirected)
 {
-    if (_undirected != undirected) {
+    if (_undirected != undirected) {        
         undirected = _undirected;
+
+        if (undirected) {
+            source->addDestinationEdge(this);
+            destination->addSourceEdge(this);
+        }
+        else {
+            source->removeDestinationEdge(this);
+            destination->removeSourceEdge(this);
+        }
+
         updateDrawing();
     }
 }
@@ -276,8 +330,15 @@ void GraphEdge::destinationUpdated()
 
 void GraphEdge::changeDirection()
 {
+    source->removeSourceEdge(this);
+    destination->removeDestinationEdge(this);
+
     GraphNode* temp = source;
     source = destination;
     destination = temp;
+
+    source->addSourceEdge(this);
+    destination->addDestinationEdge(this);
+
     updateDrawing();
 }

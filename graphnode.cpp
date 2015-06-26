@@ -5,6 +5,12 @@ GraphNode::GraphNode(unsigned _id, qreal x, qreal y, qreal _r)
   QGraphicsEllipseItem(x - _r, y - _r, _r + _r, _r + _r),
   id(_id), label(QString::number(_id)), cx(x), cy(y), r(_r)
 {
+
+}
+
+GraphNode::~GraphNode()
+{
+
 }
 
 unsigned GraphNode::getId()

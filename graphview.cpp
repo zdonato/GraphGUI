@@ -3,9 +3,16 @@
 #include <QLineEdit>
 #include <QMenu>
 
+#include "addedgecommand.h"
+#include "addnodecommand.h"
+#include "changeedgedirectioncommand.h"
+#include "changeedgeweightcommand.h"
 #include "graphEdge.h"
 #include "graphNode.h"
 #include "graphview.h"
+#include "movenodecommand.h"
+#include "removeedgecommand.h"
+#include "removenodecommand.h"
 
 GraphView::GraphView(QWidget *parent)
   :
@@ -14,6 +21,7 @@ GraphView::GraphView(QWidget *parent)
     edgeSource(NULL),
     currentAction(NONE),
     status(NULL),
+    undoStack(NULL),
     nodeRadius(15),
     weightedGraph(false),
     undirectedGraph(false),
@@ -40,6 +48,40 @@ void GraphView::clear()
     currentAction = NONE;
     edgeSource = NULL;
     selectedItem = NULL;
+    undoStack->clear();
+}
+
+void GraphView::addNode(GraphNode* node)
+{
+    scene()->addItem(node);
+    ++numberOfNodes;
+    updateStatus();
+}
+
+void GraphView::addEdge(GraphEdge* edge)
+{
+    scene()->addItem(edge);
+    ++numberOfEdges;
+    updateStatus();
+}
+
+void GraphView::removeNode(GraphNode* node)
+{
+    scene()->removeItem(node);
+    --numberOfNodes;
+    updateStatus();
+}
+
+void GraphView::removeEdge(GraphEdge* edge)
+{
+    scene()->removeItem(edge);
+    --numberOfEdges;
+    updateStatus();
+}
+
+int GraphView::getNodeRadius()
+{
+    return nodeRadius;
 }
 
 void GraphView::setNodeRadius(int radius)
@@ -66,9 +108,19 @@ void GraphView::setNodeRadius(int radius)
     scene()->update();
 }
 
+bool GraphView::isGraphWeighted()
+{
+    return weightedGraph;
+}
+
 void GraphView::setGraphWeighted(bool weighted)
 {
     weightedGraph = weighted;
+}
+
+bool GraphView::isGraphUndirected()
+{
+    return undirectedGraph;
 }
 
 void GraphView::setGraphUndirected(bool undirected)
@@ -89,16 +141,9 @@ void GraphView::setStatus(QLabel* _status)
     status = _status;
 }
 
-int GraphView::getRadius(){
-    return this->nodeRadius;
-}
-
-bool GraphView::isWeighted(){
-    return this->weightedGraph;
-}
-
-bool GraphView::isUndirected(){
-    return this->undirectedGraph;
+void GraphView::setUndoStack(QUndoStack* stack)
+{
+    undoStack = stack;
 }
 
 QString GraphView::actionString(GraphAction a)
@@ -139,6 +184,20 @@ QString GraphView::actionString(GraphAction a)
     return s;
 }
 
+QList<GraphNode*> GraphView::getNodes()
+{
+    QList<GraphNode*> nodes;
+
+    QListIterator<QGraphicsItem*> it(scene()->items());
+    while (it.hasNext()) {
+        GraphNode* node = dynamic_cast<GraphNode*>(it.next());
+
+        nodes.append(node);
+    }
+
+    return nodes;
+}
+
 void GraphView::updateStatus()
 {
     QString statusMessage("");
@@ -177,7 +236,7 @@ void GraphView::executeContextMenu(const QPoint& menuPosition)
         if (selectedAction == changeLabelAction)
           changeLabel(node);
         else if (selectedAction == deleteAction)
-          removeItem(node);
+          removeItemCommand(node);
     }
     else if (edge){
         QAction *changeWeightAction(NULL);
@@ -213,25 +272,21 @@ void GraphView::executeContextMenu(const QPoint& menuPosition)
         QAction *selectedAction = menu.exec(menuPosition);
 
         if (selectedAction) {
-            if (selectedAction == changeWeightAction)
+            if (selectedAction == deleteAction)
+                removeItemCommand(edge);
+            else if (selectedAction == changeWeightAction)
                 changeWeight(edge);
-            else if (selectedAction == deleteAction)
-                removeItem(edge);
             else if (selectedAction == changeDirectionSDAction)
-                edge->setUndirected(false);
-            else if (selectedAction == changeDirectionDSAction) {
-                edge->setUndirected(false);
-                edge->changeDirection();
-            }
+                undoStack->push(new ChangeEdgeDirectionCommand(edge, false, false));
+            else if (selectedAction == changeDirectionDSAction)
+                undoStack->push(new ChangeEdgeDirectionCommand(edge, true, false));
             else if (selectedAction == changeUndirectedAction)
-                edge->setUndirected(true);
-
-            scene()->update();
+                undoStack->push(new ChangeEdgeDirectionCommand(edge, false, true));
         }
     }
 }
 
-void GraphView::addEdge(bool undirected)
+void GraphView::addEdgeCommand(bool undirected)
 {
     if (edgeSource) {
         GraphNode* edgeDestination = dynamic_cast<GraphNode*>(selectedItem);
@@ -253,11 +308,8 @@ void GraphView::addEdge(bool undirected)
                         drawAsArc = true;
                         existingEdge = NULL;
                     }
-                    else {
-                        existingEdge->setUndirected(true);
-                        edgeSource->addSourceEdge(existingEdge);
-                        edgeDestination->addDestinationEdge(existingEdge);
-                    }
+                    else
+                        undoStack->push(new ChangeEdgeDirectionCommand(existingEdge, false, true));
                 }
             }
             else {
@@ -266,38 +318,24 @@ void GraphView::addEdge(bool undirected)
                     GraphEdge* edge = it.next();
                     if (edge->getDestinationNode() == edgeDestination) {
                        existingEdge = edge;
-                       if (currentAction == ADD_UNDIRECTED_EDGE) {
-                           existingEdge->setUndirected(true);
-                           edgeSource->addDestinationEdge(existingEdge);
-                           edgeDestination->addSourceEdge(existingEdge);
-                       }
+                       if (currentAction == ADD_UNDIRECTED_EDGE)
+                           undoStack->push(new ChangeEdgeDirectionCommand(existingEdge, false, true));
                     }
                 }
             }
 
             if (!existingEdge) {
                 GraphEdge* edge = new GraphEdge(edgeSource, edgeDestination, undirected, !undirectedGraph, weightedGraph, drawAsArc);
-                edgeSource->addSourceEdge(edge);
-                edgeDestination->addDestinationEdge(edge);
-
-                if (undirected) {
-                    edgeSource->addDestinationEdge(edge);
-                    edgeDestination->addSourceEdge(edge);
-                }
-
-                scene()->addItem(edge);
-                ++numberOfEdges;
-                updateStatus();
+                undoStack->push(new AddEdgeCommand(edge, this));
             }
 
             edgeSource = NULL;
-            scene()->update();
         }
     }
-    else
+    else {
         edgeSource = dynamic_cast<GraphNode*>(selectedItem);
-
-    updateStatus();
+        updateStatus();
+    }
 }
 
 void GraphView::mousePressEvent(QMouseEvent *event)
@@ -313,19 +351,17 @@ void GraphView::mousePressEvent(QMouseEvent *event)
         switch (currentAction) {
             case ADD_VERTEX:
             {
-                ++numberOfNodes;
                 GraphNode* node = new GraphNode(nextNodeID++, pt.x(), pt.y(), qreal(nodeRadius));
-                scene()->addItem(node);
-                updateStatus();
+                undoStack->push(new AddNodeCommand(node, this));
             }
             break;
 
             case ADD_DIRECTED_EDGE:
-                addEdge(false);
+                addEdgeCommand(false);
             break;
 
             case ADD_UNDIRECTED_EDGE:
-                addEdge(true);
+                addEdgeCommand(true);
             break;
 
             default:{}
@@ -336,15 +372,15 @@ void GraphView::mousePressEvent(QMouseEvent *event)
 void GraphView::mouseMoveEvent(QMouseEvent *event)
 {    
     if (currentAction == MOVING && selectedItem && event->button() != Qt::RightButton) {
-        QPointF pt = mapToScene(event->pos());
+        QPointF newPos = mapToScene(event->pos());
         GraphNode* node = dynamic_cast<GraphNode*>(selectedItem);
         if (node) {
             QRect rect = this->geometry();
 
             if (event->pos().x() - node->getRadius() > rect.left() && event->pos().x() + node->getRadius() < rect.right() &&
                 event->pos().y() - node->getRadius() > rect.top() && event->pos().y() + node->getRadius() < rect.bottom()) {
-                node->moveTo(pt);            
-                scene()->update();
+                QPointF oldPos = node->getCenter();
+                undoStack->push(new MoveNodeCommand(node, oldPos, newPos));
             }
         }
     }    
@@ -355,40 +391,31 @@ void GraphView::mouseReleaseEvent(QMouseEvent* /*event*/)
     selectedItem = NULL;
 }
 
-void GraphView::removeItem(GraphNode* node)
+void GraphView::removeItemCommand(GraphNode* node)
 {
+    undoStack->beginMacro("");
+    undoStack->push(new RemoveNodeCommand(node, this));
+
     QList<GraphEdge*>& edges = node->getSourceEdges();
     QListIterator<GraphEdge*> it(edges);
 
     while (it.hasNext())
-        removeItem(it.next());
+        removeItemCommand(it.next());
 
     edges = node->getDestinationEdges();
     it = QListIterator<GraphEdge*>(edges);
 
     while (it.hasNext())
-        removeItem(it.next());
+        removeItemCommand(it.next());
 
-    scene()->removeItem(node);
-    --numberOfNodes;
-    updateStatus();
-    delete node;
+    undoStack->endMacro();
+//    delete node;
 }
 
-void GraphView::removeItem(GraphEdge* edge)
+void GraphView::removeItemCommand(GraphEdge* edge)
 {
-    edge->getSourceNode()->removeSourceEdge(edge);
-    edge->getDestinationNode()->removeDestinationEdge(edge);
-
-    if (edge->isUndirected()) {
-        edge->getSourceNode()->removeDestinationEdge(edge);
-        edge->getDestinationNode()->removeSourceEdge(edge);
-    }
-
-    scene()->removeItem(edge);
-    --numberOfEdges;
-    updateStatus();
-    delete edge;
+    undoStack->push(new RemoveEdgeCommand(edge, this));
+//    delete edge;
 }
 
 void GraphView::changeLabel(GraphNode* node)
@@ -403,20 +430,6 @@ void GraphView::changeWeight(GraphEdge* edge)
 {
     bool ok;
     int newWeight = QInputDialog::getInt(this, "Change Label", "New weight:", edge->getWeight(), 0, 999999, 1, &ok);
-    if (ok) {
-        edge->setWeight(newWeight);
-        edge->update();
-    }
-}
-
-QList<GraphNode*> GraphView::getNodes(){
-    QListIterator<QGraphicsItem*> it(scene()->items());
-    QList<GraphNode*> nodes;
-    while (it.hasNext()) {
-        GraphNode* node = dynamic_cast<GraphNode*>(it.next());
-
-        nodes.append(node);
-    }
-
-    return nodes;
+    if (ok)
+        undoStack->push(new ChangeEdgeWeightCommand(edge, newWeight));
 }
