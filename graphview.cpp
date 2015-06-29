@@ -7,6 +7,7 @@
 #include "addnodecommand.h"
 #include "changeedgedirectioncommand.h"
 #include "changeedgeweightcommand.h"
+#include "changenodelabelcommand.h"
 #include "graphEdge.h"
 #include "graphNode.h"
 #include "graphview.h"
@@ -53,28 +54,36 @@ void GraphView::clear()
 
 void GraphView::addNode(GraphNode* node)
 {
-    scene()->addItem(node);
+    if (node->scene())
+        node->setVisible(true);
+    else
+        scene()->addItem(node);
+
     ++numberOfNodes;
     updateStatus();
 }
 
 void GraphView::addEdge(GraphEdge* edge)
 {
-    scene()->addItem(edge);
+    if (edge->scene())
+        edge->setVisible(true);
+    else
+        scene()->addItem(edge);
+
     ++numberOfEdges;
     updateStatus();
 }
 
 void GraphView::removeNode(GraphNode* node)
 {
-    scene()->removeItem(node);
+    node->setVisible(false);
     --numberOfNodes;
     updateStatus();
 }
 
 void GraphView::removeEdge(GraphEdge* edge)
 {
-    scene()->removeItem(edge);
+    edge->setVisible(false);
     --numberOfEdges;
     updateStatus();
 }
@@ -192,7 +201,8 @@ QList<GraphNode*> GraphView::getNodes()
     while (it.hasNext()) {
         GraphNode* node = dynamic_cast<GraphNode*>(it.next());
 
-        nodes.append(node);
+        if (node->isVisible())
+            nodes.append(node);
     }
 
     return nodes;
@@ -409,13 +419,11 @@ void GraphView::removeItemCommand(GraphNode* node)
         removeItemCommand(it.next());
 
     undoStack->endMacro();
-//    delete node;
 }
 
 void GraphView::removeItemCommand(GraphEdge* edge)
 {
     undoStack->push(new RemoveEdgeCommand(edge, this));
-//    delete edge;
 }
 
 void GraphView::changeLabel(GraphNode* node)
@@ -423,7 +431,7 @@ void GraphView::changeLabel(GraphNode* node)
     bool ok;
     QString newLabel = QInputDialog::getText(this, "Change Label", "New label:", QLineEdit::Normal, "", &ok);
     if (ok)
-        node->setLabel(newLabel);
+        undoStack->push(new ChangeNodeLabelCommand(node, newLabel));
 }
 
 void GraphView::changeWeight(GraphEdge* edge)
