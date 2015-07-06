@@ -17,7 +17,9 @@ class GraphNode : public QGraphicsEllipseItem
     QPointF getCenter();
     qreal getRadius();
     QString getLabel();
+    QString getSubscript();
     void setLabel(QString label);
+    void setSubscript(QString s);
     void setRadius(qreal r);
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
@@ -33,6 +35,7 @@ class GraphNode : public QGraphicsEllipseItem
   private:
     unsigned id;
     QString label;
+    QString subscript;
     qreal cx, cy, r;
     QList<GraphEdge*> sourceEdges;
     QList<GraphEdge*> destinationEdges;

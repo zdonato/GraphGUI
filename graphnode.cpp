@@ -1,9 +1,11 @@
 #include "graphnode.h"
 
+#include <QGraphicsScene>
+
 GraphNode::GraphNode(unsigned _id, qreal x, qreal y, qreal _r)
 :
   QGraphicsEllipseItem(x - _r, y - _r, _r + _r, _r + _r),
-  id(_id), label(QString::number(_id)), cx(x), cy(y), r(_r)
+  id(_id), label(QString::number(_id)), subscript(""), cx(x), cy(y), r(_r)
 {
 
 }
@@ -33,9 +35,19 @@ QString GraphNode::getLabel()
     return label;
 }
 
+QString GraphNode::getSubscript()
+{
+    return subscript;
+}
+
 void GraphNode::setLabel(QString _label)
 {
     label = _label;
+}
+
+void GraphNode::setSubscript(QString s)
+{
+    subscript = s;
 }
 
 void GraphNode::setRadius(qreal _r)
@@ -54,6 +66,13 @@ void GraphNode::paint(QPainter *painter, const QStyleOptionGraphicsItem* /*optio
     painter->setBrush(brush);
     painter->drawEllipse(rect());
     painter->drawText(rect(), Qt::AlignCenter, label);
+
+    if (!subscript.isEmpty()) {
+        QRectF subRect;
+        subRect.setRect(cx - 1.65*r, cy + 1.15*r, 15, 15);
+        painter->drawText(subRect, Qt::AlignCenter, subscript);
+        scene()->update(subRect);
+    }
 }
 
 void GraphNode::moveTo(const QPointF& pt)
