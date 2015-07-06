@@ -54,10 +54,13 @@ class GraphView : public QGraphicsView
     void changeLabel(GraphNode* node);
     void changeWeight(GraphEdge* edge);
     void addEdgeCommand(bool undirected);
+    void addNodeCommand(const QPointF& pt);
     QString actionString(GraphAction action);
 
     QGraphicsItem* selectedItem;
     GraphNode* edgeSource;
+    GraphEdge* currentEdge;
+    GraphNode* currentNode;
     GraphAction currentAction;
     QLabel* status;
     QUndoStack* undoStack;
@@ -72,7 +75,7 @@ class GraphView : public QGraphicsView
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
-
+    bool eventFilter(QObject *obj, QEvent *event);
 };
 
 #endif // GRAPHVIEW_H

@@ -12,8 +12,7 @@ class GraphEdge : public QGraphicsItem
 {
   public:
     GraphEdge(GraphNode* source, GraphNode* destination, bool undirected, bool drawArrows, bool drawWeight, bool drawAsArc);
-    GraphEdge(const GraphEdge& other);
-    GraphEdge& operator=(const GraphEdge& other);
+    GraphEdge(GraphNode* source, const QPointF& endPoint, bool undirected, bool drawArrows, bool drawWeight, bool drawAsArc);
     virtual ~GraphEdge();
 
     void updateDrawing();
@@ -31,6 +30,8 @@ class GraphEdge : public QGraphicsItem
 
     GraphNode* getSourceNode();
     GraphNode* getDestinationNode();
+    void setDestinationNode(GraphNode* node);
+    void setEndPoint(const QPointF& endPoint);
 
     virtual QRectF boundingRect() const;
     virtual QPainterPath shape() const;
@@ -47,6 +48,7 @@ class GraphEdge : public QGraphicsItem
 
     GraphNode* source;
     GraphNode* destination;
+    QPointF destinationCenter;
     QPainterPath* shapePath;
     QGraphicsTextItem* weightText;
     bool undirected;

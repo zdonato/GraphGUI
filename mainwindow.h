@@ -39,6 +39,7 @@ class MainWindow : public QMainWindow
     void toolBarOptionClicked(QAction* action);
     void radiusChanged(int r);
     void resizeEvent(QResizeEvent *);
+    void keyPressEvent(QKeyEvent *event);
 
 };
 

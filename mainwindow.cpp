@@ -64,6 +64,12 @@ void MainWindow::resizeEvent(QResizeEvent * event)
     ui->graphicsView->resize(size);
 }
 
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Escape)
+        ui->graphicsView->setCurrentAction(NONE);
+}
+
 void MainWindow::menuOptionClicked(QAction* action)
 {
     if (action == ui->actionNew_Unweighted_Directed_Graph) {

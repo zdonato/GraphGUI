@@ -20,6 +20,8 @@ GraphView::GraphView(QWidget *parent)
     QGraphicsView(parent),
     selectedItem(NULL),
     edgeSource(NULL),
+    currentEdge(NULL),
+    currentNode(NULL),
     currentAction(NONE),
     status(NULL),
     undoStack(NULL),
@@ -32,6 +34,8 @@ GraphView::GraphView(QWidget *parent)
 {
     setScene(new QGraphicsScene());
     scene()->setSceneRect(rect());
+    setMouseTracking(true);
+    this->viewport()->installEventFilter(this);
 }
 
 GraphView::~GraphView()
@@ -49,6 +53,8 @@ void GraphView::clear()
     currentAction = NONE;
     edgeSource = NULL;
     selectedItem = NULL;
+    currentEdge = NULL;
+    currentNode = NULL;
     undoStack->clear();
 }
 
@@ -142,6 +148,25 @@ void GraphView::setCurrentAction(GraphAction action)
     currentAction = action;
     selectedItem = NULL;
     edgeSource = NULL;
+
+    if (currentEdge) {
+        scene()->removeItem(currentEdge);
+        delete currentEdge;
+        currentEdge = NULL;
+    }
+
+    if (currentNode) {
+        scene()->removeItem(currentNode);
+        delete currentNode;
+        currentNode = NULL;
+        --nextNodeID;
+    }
+    else if (currentAction == ADD_VERTEX) {
+        currentNode = new GraphNode(nextNodeID++, 0, 0, qreal(nodeRadius));
+        currentNode->setVisible(false);
+        scene()->addItem(currentNode);
+    }
+
     updateStatus();
 }
 
@@ -334,18 +359,36 @@ void GraphView::addEdgeCommand(bool undirected)
                 }
             }
 
-            if (!existingEdge) {
-                GraphEdge* edge = new GraphEdge(edgeSource, edgeDestination, undirected, !undirectedGraph, weightedGraph, drawAsArc);
-                undoStack->push(new AddEdgeCommand(edge, this));
+            if (existingEdge) {
+                scene()->removeItem(currentEdge);
+                delete currentEdge;
+            }
+            else {
+                currentEdge->setDestinationNode(edgeDestination);
+                currentEdge->setDrawAsArc(drawAsArc);
+                undoStack->push(new AddEdgeCommand(currentEdge, this));
             }
 
+            currentEdge = NULL;
             edgeSource = NULL;
         }
     }
     else {
         edgeSource = dynamic_cast<GraphNode*>(selectedItem);
-        updateStatus();
+        currentEdge = new GraphEdge(edgeSource, edgeSource->getCenter(), undirected, !undirectedGraph, weightedGraph, false);
+        // Setting the Z value makes sure the selection of nodes are made correct
+        currentEdge->setZValue(-1);
+        scene()->addItem(currentEdge);
     }
+
+    updateStatus();
+}
+
+void GraphView::addNodeCommand(const QPointF& pt)
+{
+    undoStack->push(new AddNodeCommand(currentNode, this));
+    currentNode = new GraphNode(nextNodeID++, pt.x(), pt.y(), qreal(nodeRadius));
+    scene()->addItem(currentNode);
 }
 
 void GraphView::mousePressEvent(QMouseEvent *event)
@@ -360,10 +403,7 @@ void GraphView::mousePressEvent(QMouseEvent *event)
     else {
         switch (currentAction) {
             case ADD_VERTEX:
-            {
-                GraphNode* node = new GraphNode(nextNodeID++, pt.x(), pt.y(), qreal(nodeRadius));
-                undoStack->push(new AddNodeCommand(node, this));
-            }
+                addNodeCommand(pt);
             break;
 
             case ADD_DIRECTED_EDGE:
@@ -394,6 +434,29 @@ void GraphView::mouseMoveEvent(QMouseEvent *event)
             }
         }
     }    
+}
+
+bool GraphView::eventFilter(QObject *obj, QEvent *event)
+{
+    bool result(true);
+
+    if (currentNode && event->type() == QEvent::MouseMove) {
+        QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+        QPointF mousePos = mapToScene(mouseEvent->pos());
+        currentNode->setVisible(true);
+        currentNode->setCenter(mousePos);
+        scene()->update();
+    }
+    else if (edgeSource && event->type() == QEvent::MouseMove) {
+        QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+        QPointF mousePos = mapToScene(mouseEvent->pos());
+        currentEdge->setEndPoint(mousePos);
+        scene()->update();
+    }
+    else
+        result = QObject::eventFilter(obj, event);
+
+    return result;
 }
 
 void GraphView::mouseReleaseEvent(QMouseEvent* /*event*/)

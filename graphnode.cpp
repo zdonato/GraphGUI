@@ -40,6 +40,17 @@ QString GraphNode::getSubscript()
     return subscript;
 }
 
+void GraphNode::setCenter(const QPointF& pt)
+{
+    cx = pt.x();
+    cy = pt.y();
+
+    QRectF newRect = rect();
+    newRect.moveLeft(cx - r);
+    newRect.moveTop(cy - r);
+    setRect(newRect);
+}
+
 void GraphNode::setLabel(QString _label)
 {
     label = _label;
@@ -77,24 +88,18 @@ void GraphNode::paint(QPainter *painter, const QStyleOptionGraphicsItem* /*optio
 
 void GraphNode::moveTo(const QPointF& pt)
 {
-    cx = pt.x();
-    cy = pt.y();
+    setCenter(pt);
 
-    QRectF newRect = rect();
-    newRect.moveLeft(cx - r);
-    newRect.moveTop(cy - r);
-    setRect(newRect);
-
-    QListIterator<GraphEdge*> it(sourceEdges);
+    QListIterator<GraphEdge*> it(destinationEdges);
     while (it.hasNext())
-        it.next()->sourceUpdated();
+        it.next()->destinationUpdated();
 
-    it = QListIterator<GraphEdge*>(destinationEdges);
+    it = QListIterator<GraphEdge*>(sourceEdges);
     while (it.hasNext()) {
         GraphEdge* edge = it.next();
         // The undirected edges were already updated because the node is both source and destination
         if (!edge->isUndirected())
-            edge->destinationUpdated();
+            edge->sourceUpdated();
     }
 }
 

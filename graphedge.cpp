@@ -8,6 +8,7 @@ GraphEdge::GraphEdge(GraphNode* src, GraphNode* dst, bool _undirected, bool _dra
   QGraphicsItem(),
   source(src),
   destination(dst),
+  destinationCenter(dst->getCenter()),
   shapePath(NULL),
   weightText(NULL),
   undirected(_undirected),
@@ -20,48 +21,22 @@ GraphEdge::GraphEdge(GraphNode* src, GraphNode* dst, bool _undirected, bool _dra
     updateDrawing();
 }
 
-GraphEdge::GraphEdge(const GraphEdge& other)
-  :
-    QGraphicsItem(),
-    source(other.source),
-    destination(other.destination),
-    weightText(NULL),
-    undirected(other.undirected),
-    drawArrows(other.drawArrows),
-    drawWeight(other.drawWeight),
-    drawAsArc(other.drawAsArc),
-    weight(other.weight),
-    bold(other.bold)
+GraphEdge::GraphEdge(GraphNode* src, const QPointF& endPoint, bool _undirected, bool _drawArrows, bool _drawWeight, bool _drawAsArc)
+:
+  QGraphicsItem(),
+  source(src),
+  destination(NULL),
+  destinationCenter(endPoint),
+  shapePath(NULL),
+  weightText(NULL),
+  undirected(_undirected),
+  drawArrows(_drawArrows),
+  drawWeight(_drawWeight),
+  drawAsArc(_drawAsArc),
+  weight(1),
+  bold(false)
 {
-    shapePath = new QPainterPath(*other.shapePath);
-    if (other.weightText) {
-        weightText = new QGraphicsTextItem(QString::number(weight));
-        weightText->setPos(other.weightText->pos());
-    }
-}
-
-GraphEdge& GraphEdge::operator=(const GraphEdge& other)
-{
-    delete weightText;
-    if (other.weightText) {
-        weightText = new QGraphicsTextItem(QString::number(weight));
-        weightText->setPos(other.weightText->pos());
-    }
-    else
-        weightText = NULL;
-    delete shapePath;
-    shapePath = new QPainterPath(*other.shapePath);
-
-    source = other.source;
-    destination = other.destination;
-    undirected = other.undirected;
-    drawArrows = other.drawArrows;
-    drawWeight = other.drawWeight;
-    drawAsArc = other.drawAsArc;
-    weight = other.weight;
-    bold = other.bold;
-
-    return *this;
+    updateDrawing();
 }
 
 GraphEdge::~GraphEdge()
@@ -91,8 +66,8 @@ void GraphEdge::updateDrawing()
 void GraphEdge::createArcDrawing()
 {
     QPointF sourceCenter = source->getCenter();
-    QPointF destinationCenter = destination->getCenter();
     QLineF line(sourceCenter, destinationCenter);
+    qreal dstRadius = destination ? destination->getRadius() : source->getRadius();
 
     QPointF center = line.pointAt(0.5);
     QPointF curvePoint(center.x(), center.y() + 30);
@@ -118,7 +93,7 @@ void GraphEdge::createArcDrawing()
     line.setP1(pi);
 
     QPointF pf(destinationCenter);
-    p0 = QPointF(pf.x(), pf.y() + destination->getRadius());
+    p0 = QPointF(pf.x(), pf.y() + dstRadius);
     radiusLine = QLineF(pf, p0);
     radiusLine.setAngle(line.angle() + 135);
     pf = radiusLine.p2();
@@ -158,9 +133,8 @@ void GraphEdge::createArcDrawing()
 void GraphEdge::createStraightLineDrawing()
 {    
     QPointF sourceCenter = source->getCenter();
-    QPointF destinationCenter = destination->getCenter();
-
     QLineF line(sourceCenter, destinationCenter);
+    qreal dstRadius = destination ? destination->getRadius() : source->getRadius();
 
     QPointF pi(sourceCenter);
     QPointF p0(pi.x() + source->getRadius(), pi.y());
@@ -170,7 +144,7 @@ void GraphEdge::createStraightLineDrawing()
     line.setP1(pi);
 
     QPointF pf(destinationCenter);
-    p0 = QPointF(pf.x() + destination->getRadius(), pf.y());
+    p0 = QPointF(pf.x() + dstRadius, pf.y());
     radiusLine = QLineF(pf, p0);
     radiusLine.setAngle(line.angle() - 180);
     pf = radiusLine.p2();
@@ -292,6 +266,19 @@ GraphNode* GraphEdge::getDestinationNode()
     return destination;
 }
 
+void GraphEdge::setDestinationNode(GraphNode* node)
+{
+    destination = node;
+    destinationCenter = node->getCenter();
+    updateDrawing();
+}
+
+void GraphEdge::setEndPoint(const QPointF& endPoint)
+{
+    destinationCenter = endPoint;
+    updateDrawing();
+}
+
 QRectF GraphEdge::boundingRect() const
 {
     return shapePath->boundingRect();
@@ -325,6 +312,7 @@ void GraphEdge::sourceUpdated()
 
 void GraphEdge::destinationUpdated()
 {
+    destinationCenter = destination->getCenter();
     updateDrawing();
 }
 
