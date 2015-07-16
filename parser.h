@@ -14,7 +14,9 @@ class Parser
     void saveGraph(QString existingPath = NULL);
 
     QList<GraphNode*>& getNodes();
+    QList<GraphEdge*>& getEdges();
     void setNodes(QList<GraphNode*> nodes);
+    void setEdges(QList<GraphEdge*> edges);
 
     void setEdgeType(bool type);
     void setNodeRadius(int r);
@@ -27,7 +29,7 @@ class Parser
     QString graphWeight;
     int nodeRadius;
     QList<GraphNode*> nodes;
-    int numberOfNodes;
+    QList<GraphEdge*> edges;
 };
 
 #endif // PARSER_H

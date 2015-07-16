@@ -46,6 +46,7 @@ class GraphView : public QGraphicsView
     void removeNode(GraphNode* node);
     void removeEdge(GraphEdge* edge);
     QList<GraphNode*> getNodes();
+    QList<GraphEdge*> getEdges();
 
   private:
     void executeContextMenu(const QPoint& menuPosition);

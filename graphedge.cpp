@@ -256,6 +256,22 @@ void GraphEdge::setDrawAsArc(bool draw)
     }
 }
 
+bool GraphEdge::isBold(){
+    return bold;
+}
+
+bool GraphEdge::shouldDrawArrows(){
+    return drawArrows;
+}
+
+bool GraphEdge::shouldDrawWeight(){
+    return drawWeight;
+}
+
+bool GraphEdge::shouldDrawAsArc(){
+    return drawAsArc;
+}
+
 GraphNode* GraphEdge::getSourceNode()
 {
     return source;

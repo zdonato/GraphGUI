@@ -190,21 +190,13 @@ void MainWindow::openGraph()
         GraphNode* node = it.next();
 
         ui->graphicsView->scene()->addItem(node);
+    }
 
-        QListIterator<GraphEdge*> edgesIt(node->getSourceEdges());
-        while (edgesIt.hasNext()) {
-            GraphEdge* edge = edgesIt.next();
-
-            ui->graphicsView->scene()->addItem(edge);
-        }
-
-        edgesIt = QListIterator<GraphEdge*>(node->getSourceEdges());
-        while (edgesIt.hasNext()) {
-            GraphEdge* edge = edgesIt.next();
-
-            if (!edge->isUndirected())
-                ui->graphicsView->scene()->addItem(edge);
-        }
+    QListIterator<GraphEdge*> itE(parser.getEdges());
+    while (itE.hasNext())
+    {
+        GraphEdge* edge = itE.next();
+        ui->graphicsView->scene()->addItem(edge);
     }
 
     ui->graphicsView->setEnabled(true);
@@ -227,13 +219,17 @@ void MainWindow::saveGraph()
 //    else
 //        saveGraphAs();
 
+    QString filePath = QFileDialog::getSaveFileName(this, "Save Graph", QCoreApplication::applicationDirPath(), "Graph Algorithms File (*.gaf)");
+    QFileInfo fileInfo(filePath);
+
     Parser parser;
     parser.setNodes(ui->graphicsView->getNodes());
+    parser.setEdges(ui->graphicsView->getEdges());
     parser.setGraphWeight(ui->graphicsView->isGraphWeighted());
     parser.setEdgeType(ui->graphicsView->isGraphUndirected());
     parser.setNodeRadius(ui->graphicsView->getNodeRadius());
 
-    parser.saveGraph("example2.gaf");
+    parser.saveGraph(fileInfo.absoluteFilePath());
 }
 
 void MainWindow::saveGraphAs()

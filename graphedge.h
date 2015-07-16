@@ -28,6 +28,11 @@ class GraphEdge : public QGraphicsItem
     void setDrawWeight(bool draw);
     void setDrawAsArc(bool drawAsArc);
 
+    bool isBold();
+    bool shouldDrawArrows();
+    bool shouldDrawWeight();
+    bool shouldDrawAsArc();
+
     GraphNode* getSourceNode();
     GraphNode* getDestinationNode();
     void setDestinationNode(GraphNode* node);

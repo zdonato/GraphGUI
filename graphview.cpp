@@ -226,11 +226,30 @@ QList<GraphNode*> GraphView::getNodes()
     while (it.hasNext()) {
         GraphNode* node = dynamic_cast<GraphNode*>(it.next());
 
-        if (node->isVisible())
+        if (node != NULL){
             nodes.append(node);
+        }
     }
 
     return nodes;
+}
+
+QList<GraphEdge*> GraphView::getEdges()
+{
+    QList<GraphEdge*> edges;
+
+    QListIterator<QGraphicsItem*> it(scene()->items());
+    while (it.hasNext())
+    {
+        GraphEdge* edge = dynamic_cast<GraphEdge*>(it.next());
+
+        if (edge != NULL)
+        {
+            edges.append(edge);
+        }
+    }
+
+    return edges;
 }
 
 void GraphView::updateStatus()

@@ -40,6 +40,16 @@ QString GraphNode::getSubscript()
     return subscript;
 }
 
+qreal GraphNode::getX()
+{
+    return cx;
+}
+
+qreal GraphNode::getY()
+{
+    return cy;
+}
+
 void GraphNode::setCenter(const QPointF& pt)
 {
     cx = pt.x();

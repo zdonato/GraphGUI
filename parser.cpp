@@ -28,6 +28,16 @@ void Parser::setNodes(QList<GraphNode*> nodes)
     this->nodes = nodes;
 }
 
+QList<GraphEdge*>& Parser::getEdges()
+{
+    return edges;
+}
+
+void Parser::setEdges(QList<GraphEdge *> edges)
+{
+    this->edges = edges;
+}
+
 void Parser::setEdgeType(bool undirected)
 {
     if (undirected)
@@ -82,21 +92,21 @@ void Parser::parseGraph(QString filePath)
                 d.Parse(content.c_str());
 
                 // We now have a DOM of the JSON.
-                // Save the values.
+                // Load the values.
 
-                // Save the edge type.
+                // Load the edge type.
                 rapidjson::Value& val = d["edgeType"];
                 edgeType = val.GetString();
 
-                // Save the graph weight.
+                // Load the graph weight.
                 val = d["graphWeight"];
                 graphWeight = val.GetString();
 
-                // Save the radius.
+                // Load the radius.
                 val = d["radius"];
                 nodeRadius = val.GetInt();
 
-                // Save the nodes.
+                // Load the nodes.
                 const rapidjson::Value& nodesArray = d["nodes"];
                 assert(nodesArray.IsArray());
 
@@ -106,22 +116,22 @@ void Parser::parseGraph(QString filePath)
                                                     nodesArray[i]["y"].GetInt(),
                                                     nodeRadius);
                     node->setLabel(nodesArray[i]["label"].GetString());
-
-                    // Add any adjacent nodes.
-                    const rapidjson::Value& adjArray = nodesArray[i]["adjacent"];
-                    if (!adjArray.IsNull() && adjArray.IsArray()) {
-                        for (rapidjson::SizeType j = 0; j < adjArray.Size(); ++j) {
-                            GraphNode* adj = findNode(adjArray[i]["nodeID"].GetInt());
-
-                            if (adj != NULL) {
-                                // TODO: Fix whether undirected and weighted.
-                                GraphEdge* edge = new GraphEdge(node, adj, true, true, false, false);
-                                node->addDestinationEdge(edge);
-                            }
-                        }
-                    }
-
                     nodes.append(node);
+                }
+
+                // Load the edges.
+
+                const rapidjson::Value& edgesArray = d["edges"];
+                assert(edgesArray.IsArray());
+
+                for (rapidjson::SizeType i = 0; i < edgesArray.Size(); ++i){
+                    GraphEdge* edge = new GraphEdge(findNode(edgesArray[i]["source"].GetInt()),
+                                                    findNode(edgesArray[i]["destination"].GetInt()),
+                                                    edgesArray[i]["undirected"].GetBool(),
+                                                    edgesArray[i]["drawArrows"].GetBool(),
+                                                    edgesArray[i]["drawWeight"].GetBool(),
+                                                    edgesArray[i]["drawAsArc"].GetBool());
+                    edges.append(edge);
                 }
             }
         }
@@ -153,6 +163,7 @@ void Parser::saveGraph(QString filePath)
 
     QListIterator<GraphNode*> it(getNodes());
 
+    // Save each node.
     while(it.hasNext()) {
         GraphNode* node = it.next();
 
@@ -162,10 +173,10 @@ void Parser::saveGraph(QString filePath)
         writer.String(node->getLabel().toStdString().c_str());
 
         writer.String("x");
-        writer.Int(node->x());
+        writer.Int(node->getX());
 
         writer.String("y");
-        writer.Int(node->y());
+        writer.Int(node->getY());
 
         writer.String("id");
         writer.Int(node->getId());
@@ -174,6 +185,48 @@ void Parser::saveGraph(QString filePath)
     }
 
     writer.EndArray();
+
+    QListIterator<GraphEdge*> itE(getEdges());
+
+    // Save all edges.
+
+    writer.String("edges");
+    writer.StartArray();
+
+    while(itE.hasNext()){
+        GraphEdge* edge = itE.next();
+
+        writer.StartObject();
+
+        writer.String("source");
+        writer.Int(edge->getSourceNode()->getId());
+
+        writer.String("destination");
+        writer.Int(edge->getDestinationNode()->getId());
+
+        writer.String("weight");
+        writer.Int(edge->getWeight());
+
+        writer.String("undirected");
+        writer.Bool(edge->isUndirected());
+
+        writer.String("isBold");
+        writer.Bool(edge->isBold());
+
+        writer.String("drawArrows");
+        writer.Bool(edge->shouldDrawArrows());
+
+        writer.String("drawWeight");
+        writer.Bool(edge->shouldDrawWeight());
+
+        writer.String("drawAsArc");
+        writer.Bool(edge->shouldDrawAsArc());
+
+        writer.EndObject();
+    }
+
+    writer.EndArray();
+
 
     writer.EndObject();
 
