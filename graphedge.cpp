@@ -256,19 +256,23 @@ void GraphEdge::setDrawAsArc(bool draw)
     }
 }
 
-bool GraphEdge::isBold(){
+bool GraphEdge::isBold()
+{
     return bold;
 }
 
-bool GraphEdge::shouldDrawArrows(){
+bool GraphEdge::shouldDrawArrows()
+{
     return drawArrows;
 }
 
-bool GraphEdge::shouldDrawWeight(){
+bool GraphEdge::shouldDrawWeight()
+{
     return drawWeight;
 }
 
-bool GraphEdge::shouldDrawAsArc(){
+bool GraphEdge::shouldDrawAsArc()
+{
     return drawAsArc;
 }
 
@@ -340,6 +344,7 @@ void GraphEdge::changeDirection()
     GraphNode* temp = source;
     source = destination;
     destination = temp;
+    destinationCenter = destination->getCenter();
 
     source->addSourceEdge(this);
     destination->addDestinationEdge(this);

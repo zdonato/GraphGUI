@@ -54,6 +54,16 @@ void Parser::setGraphWeight(bool weighted)
         graphWeight = "unweighted";
 }
 
+bool Parser::isGraphWeighted()
+{
+    return graphWeight == "weighted";
+}
+
+bool Parser::isGraphUndirected()
+{
+    return edgeType == "undirected";
+}
+
 void Parser::setNodeRadius(int r)
 {
     nodeRadius = r;
@@ -164,7 +174,7 @@ void Parser::saveGraph(QString filePath)
     QListIterator<GraphNode*> it(getNodes());
 
     // Save each node.
-    while(it.hasNext()) {
+    while (it.hasNext()) {
         GraphNode* node = it.next();
 
         writer.StartObject();
@@ -172,11 +182,13 @@ void Parser::saveGraph(QString filePath)
         writer.String("label");
         writer.String(node->getLabel().toStdString().c_str());
 
+        QPointF nodeCenter = node->getCenter();
+
         writer.String("x");
-        writer.Int(node->getX());
+        writer.Int(nodeCenter.x());
 
         writer.String("y");
-        writer.Int(node->getY());
+        writer.Int(nodeCenter.y());
 
         writer.String("id");
         writer.Int(node->getId());

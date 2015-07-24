@@ -22,6 +22,9 @@ class Parser
     void setNodeRadius(int r);
     void setGraphWeight(bool weight);
 
+    bool isGraphWeighted();
+    bool isGraphUndirected();
+
   private:
     GraphNode* findNode(unsigned id);
 

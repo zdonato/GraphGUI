@@ -30,12 +30,13 @@ GraphView::GraphView(QWidget *parent)
     undirectedGraph(false),
     numberOfNodes(0),
     numberOfEdges(0),
-    nextNodeID(1)
+    nextNodeID(1),
+    filePath("")
 {
     setScene(new QGraphicsScene());
     scene()->setSceneRect(rect());
     setMouseTracking(true);
-    this->viewport()->installEventFilter(this);
+    viewport()->installEventFilter(this);
 }
 
 GraphView::~GraphView()
@@ -56,6 +57,7 @@ void GraphView::clear()
     currentEdge = NULL;
     currentNode = NULL;
     undoStack->clear();
+    setFilePath("");
 }
 
 void GraphView::addNode(GraphNode* node)
@@ -66,6 +68,7 @@ void GraphView::addNode(GraphNode* node)
         scene()->addItem(node);
 
     ++numberOfNodes;
+    ++nextNodeID;
     updateStatus();
 }
 
@@ -145,6 +148,9 @@ void GraphView::setGraphUndirected(bool undirected)
 
 void GraphView::setCurrentAction(GraphAction action)
 {
+    if (currentAction == action)
+        return;
+
     currentAction = action;
     selectedItem = NULL;
     edgeSource = NULL;
@@ -159,10 +165,9 @@ void GraphView::setCurrentAction(GraphAction action)
         scene()->removeItem(currentNode);
         delete currentNode;
         currentNode = NULL;
-        --nextNodeID;
     }
     else if (currentAction == ADD_VERTEX) {
-        currentNode = new GraphNode(nextNodeID++, 0, 0, qreal(nodeRadius));
+        currentNode = new GraphNode(nextNodeID, 0, 0, qreal(nodeRadius));
         currentNode->setVisible(false);
         scene()->addItem(currentNode);
     }
@@ -173,6 +178,16 @@ void GraphView::setCurrentAction(GraphAction action)
 void GraphView::setStatus(QLabel* _status)
 {
     status = _status;
+}
+
+QString GraphView::getFilePath()
+{
+    return filePath;
+}
+
+void GraphView::setFilePath(QString path)
+{
+    filePath = path;
 }
 
 void GraphView::setUndoStack(QUndoStack* stack)
@@ -226,9 +241,8 @@ QList<GraphNode*> GraphView::getNodes()
     while (it.hasNext()) {
         GraphNode* node = dynamic_cast<GraphNode*>(it.next());
 
-        if (node != NULL){
+        if (node && node->isVisible())
             nodes.append(node);
-        }
     }
 
     return nodes;
@@ -239,14 +253,11 @@ QList<GraphEdge*> GraphView::getEdges()
     QList<GraphEdge*> edges;
 
     QListIterator<QGraphicsItem*> it(scene()->items());
-    while (it.hasNext())
-    {
+    while (it.hasNext()) {
         GraphEdge* edge = dynamic_cast<GraphEdge*>(it.next());
 
-        if (edge != NULL)
-        {
+        if (edge && edge->isVisible())
             edges.append(edge);
-        }
     }
 
     return edges;
@@ -392,7 +403,7 @@ void GraphView::addEdgeCommand(bool undirected)
             edgeSource = NULL;
         }
     }
-    else {
+    else if (selectedItem) {
         edgeSource = dynamic_cast<GraphNode*>(selectedItem);
         currentEdge = new GraphEdge(edgeSource, edgeSource->getCenter(), undirected, !undirectedGraph, weightedGraph, false);
         // Setting the Z value makes sure the selection of nodes are made correct
@@ -406,7 +417,7 @@ void GraphView::addEdgeCommand(bool undirected)
 void GraphView::addNodeCommand(const QPointF& pt)
 {
     undoStack->push(new AddNodeCommand(currentNode, this));
-    currentNode = new GraphNode(nextNodeID++, pt.x(), pt.y(), qreal(nodeRadius));
+    currentNode = new GraphNode(nextNodeID, pt.x(), pt.y(), qreal(nodeRadius));
     scene()->addItem(currentNode);
 }
 

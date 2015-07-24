@@ -18,8 +18,6 @@ class GraphNode : public QGraphicsEllipseItem
     qreal getRadius();
     QString getLabel();
     QString getSubscript();
-    qreal getX();
-    qreal getY();
     void setCenter(const QPointF& p);
     void setLabel(QString label);
     void setSubscript(QString s);

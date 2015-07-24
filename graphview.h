@@ -48,6 +48,9 @@ class GraphView : public QGraphicsView
     QList<GraphNode*> getNodes();
     QList<GraphEdge*> getEdges();
 
+    QString getFilePath();
+    void setFilePath(QString path);
+
   private:
     void executeContextMenu(const QPoint& menuPosition);
     void removeItemCommand(GraphNode* node);
@@ -71,6 +74,7 @@ class GraphView : public QGraphicsView
     unsigned numberOfNodes;
     unsigned numberOfEdges;
     unsigned nextNodeID;
+    QString filePath;
 
   protected slots:
     void mousePressEvent(QMouseEvent *event);

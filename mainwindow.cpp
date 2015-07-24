@@ -5,6 +5,7 @@
 #include <QFileDialog>
 #include <QGraphicsView>
 #include <QLabel>
+#include <QMessageBox>
 #include <QSpinBox>
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
@@ -72,6 +73,8 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
 void MainWindow::menuOptionClicked(QAction* action)
 {
+    ui->graphicsView->setCurrentAction(NONE);
+
     if (action == ui->actionNew_Unweighted_Directed_Graph) {
         newGraph(false, false);
     }
@@ -88,7 +91,12 @@ void MainWindow::menuOptionClicked(QAction* action)
         openGraph();
     }
     else if (action == ui->actionSave) {
-        saveGraph();
+        if (ui->graphicsView->getFilePath().isEmpty())
+            saveGraphAs();
+        else {
+            QFileInfo fileInfo(ui->graphicsView->getFilePath());
+            saveGraph(fileInfo);
+        }
     }
     else if (action == ui->actionSave_as) {
         saveGraphAs();
@@ -128,100 +136,104 @@ void MainWindow::radiusChanged(int r)
 
 void MainWindow::newGraph(bool weighted, bool undirected)
 {
-//    if (fileOpen)
-//        closeGraph();
+    if (ui->graphicsView->getFilePath().isEmpty() || closeGraph()) {
+        ui->graphicsView->setGraphWeighted(weighted);
+        ui->graphicsView->setGraphUndirected(undirected);
 
-    ui->graphicsView->setGraphWeighted(weighted);
-    ui->graphicsView->setGraphUndirected(undirected);
+        ui->graphicsView->setEnabled(true);
+        ui->actionSave->setEnabled(true);
+        ui->actionSave_as->setEnabled(true);
+        ui->actionPNG->setEnabled(true);
+        ui->actionClose->setEnabled(true);
+        ui->actionMove->setEnabled(true);
+        ui->actionAdd_Vertex->setEnabled(true);
+        ui->actionAdd_Undirected_Edge->setEnabled(true);
+        radiusEdit->setEnabled(true);
 
-    ui->graphicsView->setEnabled(true);
-    ui->actionSave->setEnabled(true);
-    ui->actionSave_as->setEnabled(true);
-    ui->actionPNG->setEnabled(true);
-    ui->actionClose->setEnabled(true);
-    ui->actionMove->setEnabled(true);
-    ui->actionAdd_Vertex->setEnabled(true);
-    ui->actionAdd_Undirected_Edge->setEnabled(true);
-    radiusEdit->setEnabled(true);
+        if (!undirected)
+            ui->actionAdd_Directed_Edge->setEnabled(true);
 
-    if (!undirected)
-        ui->actionAdd_Directed_Edge->setEnabled(true);
-
-    setWindowTitle("Graph Algorithms - New");
-    ui->graphicsView->updateStatus();
+        setWindowTitle("Graph Algorithms - New");
+        ui->graphicsView->setFilePath("");
+        ui->graphicsView->updateStatus();
+    }
 }
 
-void MainWindow::closeGraph()
+bool MainWindow::closeGraph()
 {
-//    if (!graphAlreadySavedBefore) {
-//        if (userWantsToSave)
-//            saveGraph();
-//        else
-           ui->graphicsView->clear();
-//    }
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, "Save Changes", "Would you like to save your changes?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+    if (reply == QMessageBox::Yes) {
+        QFileInfo fileInfo(ui->graphicsView->getFilePath());
+        saveGraph(fileInfo);
+    }
 
-    ui->graphicsView->setEnabled(false);
-    ui->actionSave->setEnabled(false);
-    ui->actionSave_as->setEnabled(false);
-    ui->actionPNG->setEnabled(false);
-    ui->actionClose->setEnabled(false);
-    ui->actionMove->setEnabled(false);
-    ui->actionAdd_Vertex->setEnabled(false);
-    ui->actionAdd_Undirected_Edge->setEnabled(false);
-    ui->actionAdd_Directed_Edge->setEnabled(false);
-    radiusEdit->setEnabled(false);
+    bool closed = reply != QMessageBox::Cancel;
 
-    setWindowTitle("Graph Algorithms");
+    if (closed) {
+        ui->graphicsView->clear();
+
+        ui->graphicsView->setEnabled(false);
+        ui->actionSave->setEnabled(false);
+        ui->actionSave_as->setEnabled(false);
+        ui->actionPNG->setEnabled(false);
+        ui->actionClose->setEnabled(false);
+        ui->actionMove->setEnabled(false);
+        ui->actionAdd_Vertex->setEnabled(false);
+        ui->actionAdd_Undirected_Edge->setEnabled(false);
+        ui->actionAdd_Directed_Edge->setEnabled(false);
+        radiusEdit->setEnabled(false);
+
+        setWindowTitle("Graph Algorithms");
+    }
+
+    return closed;
 }
 
 void MainWindow::openGraph()
 {
-//    if (fileOpen)
-        closeGraph();
+    if (ui->graphicsView->getFilePath().isEmpty() || closeGraph()) {
+        QString filePath = QFileDialog::getOpenFileName(this, "Open Graph", QCoreApplication::applicationDirPath(), "Graph Algorithms File (*.gaf)");
 
-    QString filePath = QFileDialog::getOpenFileName(this, "Open Graph", QCoreApplication::applicationDirPath(), "Graph Algorithms File (*.gaf)");
-    QFileInfo fileInfo(filePath);
+        if (!filePath.isNull()) {
+            QFileInfo fileInfo(filePath);
 
-    Parser parser;
-    parser.parseGraph(filePath);
+            Parser parser;
+            parser.parseGraph(filePath);
+            ui->graphicsView->setFilePath(filePath);
+            ui->graphicsView->setGraphUndirected(parser.isGraphUndirected());
+            ui->graphicsView->setGraphWeighted(parser.isGraphWeighted());
 
-    QListIterator<GraphNode*> it(parser.getNodes());
-    while (it.hasNext()) {
-        GraphNode* node = it.next();
+            QListIterator<GraphNode*> it(parser.getNodes());
+            while (it.hasNext()) {
+                GraphNode* node = it.next();
+                ui->graphicsView->addNode(node);
+            }
 
-        ui->graphicsView->scene()->addItem(node);
+            QListIterator<GraphEdge*> itE(parser.getEdges());
+            while (itE.hasNext()) {
+                GraphEdge* edge = itE.next();
+                ui->graphicsView->addEdge(edge);
+            }
+
+            ui->graphicsView->setEnabled(true);
+            ui->actionSave->setEnabled(true);
+            ui->actionSave_as->setEnabled(true);
+            ui->actionPNG->setEnabled(true);
+            ui->actionClose->setEnabled(true);
+            ui->actionMove->setEnabled(true);
+            ui->actionAdd_Vertex->setEnabled(true);
+            ui->actionAdd_Undirected_Edge->setEnabled(true);
+            ui->actionAdd_Directed_Edge->setEnabled(!parser.isGraphUndirected());
+            radiusEdit->setEnabled(true);
+
+            setWindowTitle("Graph Algorithms - " + fileInfo.fileName());
+        }
     }
-
-    QListIterator<GraphEdge*> itE(parser.getEdges());
-    while (itE.hasNext())
-    {
-        GraphEdge* edge = itE.next();
-        ui->graphicsView->scene()->addItem(edge);
-    }
-
-    ui->graphicsView->setEnabled(true);
-    ui->actionSave->setEnabled(true);
-    ui->actionSave_as->setEnabled(true);
-    ui->actionPNG->setEnabled(true);
-    ui->actionClose->setEnabled(true);
-    ui->actionMove->setEnabled(true);
-    ui->actionAdd_Vertex->setEnabled(true);
-    ui->actionAdd_Undirected_Edge->setEnabled(true);
-    radiusEdit->setEnabled(true);
-
-    setWindowTitle("Graph Algorithms - " + fileInfo.baseName());
 }
 
-void MainWindow::saveGraph()
+void MainWindow::saveGraph(const QFileInfo& fileInfo)
 {
-//    if (graphAlreadySavedBefore)
-//        save graph to file here
-//    else
-//        saveGraphAs();
-
-    QString filePath = QFileDialog::getSaveFileName(this, "Save Graph", QCoreApplication::applicationDirPath(), "Graph Algorithms File (*.gaf)");
-    QFileInfo fileInfo(filePath);
-
     Parser parser;
     parser.setNodes(ui->graphicsView->getNodes());
     parser.setEdges(ui->graphicsView->getEdges());
@@ -230,6 +242,7 @@ void MainWindow::saveGraph()
     parser.setNodeRadius(ui->graphicsView->getNodeRadius());
 
     parser.saveGraph(fileInfo.absoluteFilePath());
+    ui->graphicsView->setFilePath(fileInfo.absoluteFilePath());
 }
 
 void MainWindow::saveGraphAs()
@@ -237,8 +250,8 @@ void MainWindow::saveGraphAs()
     QString filePath = QFileDialog::getSaveFileName(this, "Save Graph", QCoreApplication::applicationDirPath(), "Graph Algorithms File (*.gaf)");
 
     if (!filePath.isNull()) {
-        saveGraph();
         QFileInfo fileInfo(filePath);
+        saveGraph(fileInfo);
         setWindowTitle("Graph Algorithms - " + fileInfo.fileName());
     }
 }

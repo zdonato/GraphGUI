@@ -6,6 +6,7 @@
 #include <QPushButton>
 #include <QSpinBox>
 #include <QUndoStack>
+#include <QFileInfo>
 #include "graphview.h"
 
 namespace Ui {
@@ -29,9 +30,9 @@ class MainWindow : public QMainWindow
     QAction* redoAction;
 
     void newGraph(bool weighted, bool undirected);
-    void closeGraph();
+    bool closeGraph();
     void openGraph();
-    void saveGraph();
+    void saveGraph(const QFileInfo& fileInfo);
     void saveGraphAs();
 
   protected slots:
