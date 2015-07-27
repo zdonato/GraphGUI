@@ -95,8 +95,27 @@
      <string>&amp;Edit</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menu_Algorithms">
+    <property name="title">
+     <string>&amp;Algorithms</string>
+    </property>
+    <addaction name="actionLoad"/>
+    <addaction name="actionBFS"/>
+    <addaction name="actionDFS"/>
+    <addaction name="actionTop_sort"/>
+    <addaction name="actionShortest_path"/>
+    <addaction name="action_Clear"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="action_About"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
+   <addaction name="menu_Algorithms"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
@@ -253,6 +272,59 @@
   <action name="actionNew_Weighted_Undirected_Graph">
    <property name="text">
     <string>&amp;Undirected</string>
+   </property>
+  </action>
+  <action name="actionLoad">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Load</string>
+   </property>
+  </action>
+  <action name="actionBFS">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;BFS</string>
+   </property>
+  </action>
+  <action name="actionDFS">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;DFS</string>
+   </property>
+  </action>
+  <action name="actionTop_sort">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Top sort</string>
+   </property>
+  </action>
+  <action name="action_Clear">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Clear results</string>
+   </property>
+  </action>
+  <action name="actionShortest_path">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Shortest path</string>
+   </property>
+  </action>
+  <action name="action_About">
+   <property name="text">
+    <string>&amp;About</string>
    </property>
   </action>
  </widget>

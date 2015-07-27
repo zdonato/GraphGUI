@@ -25,7 +25,8 @@ SOURCES += main.cpp \
     addedgecommand.cpp \
     changeedgedirectioncommand.cpp \
     changeedgeweightcommand.cpp \
-    changenodelabelcommand.cpp
+    changenodelabelcommand.cpp \
+    algorithmslibrary.cpp
 
 HEADERS  += mainwindow.h \
             graphview.h \
@@ -39,7 +40,8 @@ HEADERS  += mainwindow.h \
     addedgecommand.h \
     changeedgedirectioncommand.h \
     changeedgeweightcommand.h \
-    changenodelabelcommand.h
+    changenodelabelcommand.h \
+    algorithmslibrary.h
 
 FORMS    += mainwindow.ui
 

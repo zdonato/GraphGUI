@@ -7,6 +7,8 @@
 #include <QSpinBox>
 #include <QUndoStack>
 #include <QFileInfo>
+
+#include "algorithmslibrary.h"
 #include "graphview.h"
 
 namespace Ui {
@@ -28,12 +30,14 @@ class MainWindow : public QMainWindow
     QUndoStack* undoStack;
     QAction* undoAction;
     QAction* redoAction;
+    AlgorithmsLibrary algorithmsLibrary;
 
     void newGraph(bool weighted, bool undirected);
     bool closeGraph();
     void openGraph();
     void saveGraph(const QFileInfo& fileInfo);
     void saveGraphAs();
+    void loadLibrary();
 
   protected slots:
     void menuOptionClicked(QAction* action);
@@ -41,7 +45,7 @@ class MainWindow : public QMainWindow
     void radiusChanged(int r);
     void resizeEvent(QResizeEvent *);
     void keyPressEvent(QKeyEvent *event);
-
+    void closeEvent(QCloseEvent *event);
 };
 
 #endif // MAINWINDOW_H

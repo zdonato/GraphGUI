@@ -71,6 +71,14 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         ui->graphicsView->setCurrentAction(NONE);
 }
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+     if (!ui->graphicsView->isEnabled() || closeGraph())
+         event->accept();
+     else
+         event->ignore();
+}
+
 void MainWindow::menuOptionClicked(QAction* action)
 {
     ui->graphicsView->setCurrentAction(NONE);
@@ -109,11 +117,49 @@ void MainWindow::menuOptionClicked(QAction* action)
             pixMap.save(filePath);
         }
     }
+    else if (action == ui->actionBFS) {
+        algorithmsLibrary.clearResults();
+        algorithmsLibrary.init(ui->graphicsView);
+        algorithmsLibrary.breadthFirstSearch();
+        ui->action_Clear->setEnabled(true);
+    }
+    else if (action == ui->actionDFS) {
+        algorithmsLibrary.clearResults();
+        algorithmsLibrary.init(ui->graphicsView);
+        algorithmsLibrary.depthFirstSearch();
+        ui->action_Clear->setEnabled(true);
+    }
+    else if (action == ui->actionTop_sort) {
+        algorithmsLibrary.clearResults();
+        algorithmsLibrary.init(ui->graphicsView);
+        algorithmsLibrary.topSort();
+        ui->action_Clear->setEnabled(true);
+    }
+    else if (action == ui->actionShortest_path) {
+        QList<GraphNode*> nodes = ui->graphicsView->getNodes();
+        if (nodes.size() > 1) {
+            algorithmsLibrary.clearResults();
+            algorithmsLibrary.init(ui->graphicsView);
+            algorithmsLibrary.shortestPath(nodes.back(), nodes.first());
+            ui->action_Clear->setEnabled(true);
+        }
+    }
+    else if (action == ui->action_Clear) {
+        algorithmsLibrary.clearResults();
+        ui->action_Clear->setEnabled(false);
+    }
+    else if (action == ui->actionLoad) {
+        loadLibrary();
+    }
     else if (action == ui->actionClose) {
         closeGraph();
     }
     else if (action == ui->actionQuit) {
         close();
+    }
+    else if (action == ui->action_About) {
+        QMessageBox::information(this, "About", QString("This software was developed by Luís Gustavo Telemberg Cordeiro and Zachary Donato.\n") +
+                                                QString("Credits to Brian Borowski for supervising the project at Stevens Institute of Technology."), QMessageBox::Ok);
     }
 }
 
@@ -143,11 +189,12 @@ void MainWindow::newGraph(bool weighted, bool undirected)
         ui->graphicsView->setEnabled(true);
         ui->actionSave->setEnabled(true);
         ui->actionSave_as->setEnabled(true);
-        ui->actionPNG->setEnabled(true);
+        ui->menuExport->setEnabled(true);
         ui->actionClose->setEnabled(true);
         ui->actionMove->setEnabled(true);
         ui->actionAdd_Vertex->setEnabled(true);
         ui->actionAdd_Undirected_Edge->setEnabled(true);
+        ui->actionLoad->setEnabled(true);
         radiusEdit->setEnabled(true);
 
         if (!undirected)
@@ -176,12 +223,17 @@ bool MainWindow::closeGraph()
         ui->graphicsView->setEnabled(false);
         ui->actionSave->setEnabled(false);
         ui->actionSave_as->setEnabled(false);
-        ui->actionPNG->setEnabled(false);
+        ui->menuExport->setEnabled(false);
         ui->actionClose->setEnabled(false);
         ui->actionMove->setEnabled(false);
         ui->actionAdd_Vertex->setEnabled(false);
         ui->actionAdd_Undirected_Edge->setEnabled(false);
         ui->actionAdd_Directed_Edge->setEnabled(false);
+        ui->actionLoad->setEnabled(false);
+        ui->actionBFS->setEnabled(false);
+        ui->actionDFS->setEnabled(false);
+        ui->actionTop_sort->setEnabled(false);
+        ui->action_Clear->setEnabled(false);
         radiusEdit->setEnabled(false);
 
         setWindowTitle("Graph Algorithms");
@@ -219,12 +271,13 @@ void MainWindow::openGraph()
             ui->graphicsView->setEnabled(true);
             ui->actionSave->setEnabled(true);
             ui->actionSave_as->setEnabled(true);
-            ui->actionPNG->setEnabled(true);
+            ui->menuExport->setEnabled(true);
             ui->actionClose->setEnabled(true);
             ui->actionMove->setEnabled(true);
             ui->actionAdd_Vertex->setEnabled(true);
             ui->actionAdd_Undirected_Edge->setEnabled(true);
             ui->actionAdd_Directed_Edge->setEnabled(!parser.isGraphUndirected());
+            ui->actionLoad->setEnabled(true);
             radiusEdit->setEnabled(true);
 
             setWindowTitle("Graph Algorithms - " + fileInfo.fileName());
@@ -253,6 +306,34 @@ void MainWindow::saveGraphAs()
         QFileInfo fileInfo(filePath);
         saveGraph(fileInfo);
         setWindowTitle("Graph Algorithms - " + fileInfo.fileName());
+    }
+}
+
+void MainWindow::loadLibrary()
+{
+    QString filePath = QFileDialog::getOpenFileName(this, "Open Library", QCoreApplication::applicationDirPath(), "Libraries (*.dll *.so)");
+
+    bool ok(false);
+
+    if (!filePath.isNull()) {
+        ok = algorithmsLibrary.load(filePath);
+
+        if (ok) {
+            ui->actionBFS->setEnabled(true);
+            ui->actionDFS->setEnabled(true);
+            ui->actionTop_sort->setEnabled(true);
+            ui->actionShortest_path->setEnabled(ui->graphicsView->isGraphWeighted());
+        }
+        else
+            QMessageBox::critical(this, "Graph Algorithms - Error", "The library is not compatible with this software.");
+    }
+
+    if (!ok) {
+        ui->actionBFS->setEnabled(false);
+        ui->actionDFS->setEnabled(false);
+        ui->actionTop_sort->setEnabled(false);
+        ui->action_Clear->setEnabled(false);
+        ui->actionShortest_path->setEnabled(false);
     }
 }
 
