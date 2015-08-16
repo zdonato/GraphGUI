@@ -49,6 +49,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(radiusEdit, SIGNAL(valueChanged(int)), this, SLOT(radiusChanged(int)));
 
     setWindowTitle("Graph Algorithms");
+
+    this->hasBeenSaved = false;
 }
 
 MainWindow::~MainWindow()
@@ -208,14 +210,18 @@ void MainWindow::newGraph(bool weighted, bool undirected)
 
 bool MainWindow::closeGraph()
 {
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this, "Save Changes", "Would you like to save your changes?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-    if (reply == QMessageBox::Yes) {
-        QFileInfo fileInfo(ui->graphicsView->getFilePath());
-        saveGraph(fileInfo);
-    }
+    bool closed = true;
+    if (!this->hasBeenSaved)
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "Save Changes", "Would you like to save your changes?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+        if (reply == QMessageBox::Yes) {
+            QFileInfo fileInfo(ui->graphicsView->getFilePath());
+            saveGraph(fileInfo);
+        }
 
-    bool closed = reply != QMessageBox::Cancel;
+        closed = reply != QMessageBox::Cancel;
+    }
 
     if (closed) {
         ui->graphicsView->clear();
@@ -239,6 +245,8 @@ bool MainWindow::closeGraph()
         setWindowTitle("Graph Algorithms");
     }
 
+    this->hasBeenSaved = false;
+
     return closed;
 }
 
@@ -250,18 +258,23 @@ void MainWindow::openGraph()
         if (!filePath.isNull()) {
             QFileInfo fileInfo(filePath);
 
+            // Begin parsing.
             Parser parser;
+
+            // Parser will parse JSON into the nodes/edges. All info about the graph is now located in the parser object.
             parser.parseGraph(filePath);
             ui->graphicsView->setFilePath(filePath);
             ui->graphicsView->setGraphUndirected(parser.isGraphUndirected());
             ui->graphicsView->setGraphWeighted(parser.isGraphWeighted());
 
+            // Iterate over the nodes; create them and add to the screen.
             QListIterator<GraphNode*> it(parser.getNodes());
             while (it.hasNext()) {
                 GraphNode* node = it.next();
                 ui->graphicsView->addNode(node);
             }
 
+            // Iterate over the edges; create them and add to the screen.
             QListIterator<GraphEdge*> itE(parser.getEdges());
             while (itE.hasNext()) {
                 GraphEdge* edge = itE.next();
@@ -288,14 +301,18 @@ void MainWindow::openGraph()
 void MainWindow::saveGraph(const QFileInfo& fileInfo)
 {
     Parser parser;
+    // Send the parser all information needed.
+    // Nodes, Edeges, Weighted/Unweighted, EdgeType, and radius of the nodes.
     parser.setNodes(ui->graphicsView->getNodes());
     parser.setEdges(ui->graphicsView->getEdges());
     parser.setGraphWeight(ui->graphicsView->isGraphWeighted());
     parser.setEdgeType(ui->graphicsView->isGraphUndirected());
     parser.setNodeRadius(ui->graphicsView->getNodeRadius());
 
+    // Save the graph.
     parser.saveGraph(fileInfo.absoluteFilePath());
     ui->graphicsView->setFilePath(fileInfo.absoluteFilePath());
+    this->hasBeenSaved = true;
 }
 
 void MainWindow::saveGraphAs()
@@ -306,6 +323,7 @@ void MainWindow::saveGraphAs()
         QFileInfo fileInfo(filePath);
         saveGraph(fileInfo);
         setWindowTitle("Graph Algorithms - " + fileInfo.fileName());
+        this->hasBeenSaved = true;
     }
 }
 

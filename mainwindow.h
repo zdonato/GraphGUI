@@ -31,6 +31,7 @@ class MainWindow : public QMainWindow
     QAction* undoAction;
     QAction* redoAction;
     AlgorithmsLibrary algorithmsLibrary;
+    bool hasBeenSaved;
 
     void newGraph(bool weighted, bool undirected);
     bool closeGraph();
